@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "407555619275",
+    "project_id": "mitt-ce429",
+    "storage_bucket": "mitt-ce429.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407555619275:android:11e0c9fcda85a51fe7de4e",
+        "android_client_info": {
+          "package_name": "com.example.graduation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiK1LggTS6JrnbHjvOK53ICaSaah0aAbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
