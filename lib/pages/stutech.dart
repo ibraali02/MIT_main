@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'signupstd.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
           Container(
-            color: Color(0xFFF1ECF0),
+            color: const Color(0xFFF1ECF0),
             height: MediaQuery.of(context).size.height * 0.5,
             child: Center(
               child: Image.asset(
@@ -18,14 +20,14 @@ class LoginPage extends StatelessWidget {
             ),
           ),
           Container(
-            color: Color(0xFF5CC2D2),
+            color: const Color(0xFF5CC2D2),
             height: MediaQuery.of(context).size.height * 0.5,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20.0),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 20.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -38,11 +40,11 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Align(
+                  const SizedBox(height: 10),
+                  const Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0),
+                      padding: EdgeInsets.only(left: 20.0),
                       child: Text(
                         'LOG IN AS',
                         style: TextStyle(
@@ -53,7 +55,7 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 60,
@@ -63,16 +65,16 @@ class LoginPage extends StatelessWidget {
                       ),
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => SignUpStd()),
+                          MaterialPageRoute(builder: (context) => const SignUpStd()),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         'STUDENT',
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 60,
@@ -83,7 +85,7 @@ class LoginPage extends StatelessWidget {
                       onPressed: () {
                         // هنا يمكنك إضافة الأكواد الخاصة بتسجيل الدخول كمعلم
                       },
-                      child: Text(
+                      child: const Text(
                         'TEACHER',
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'learning_reminders_page.dart'; // تأكد من صحة المسار
 
 class FirstUpPage extends StatefulWidget {
+  const FirstUpPage({super.key});
+
   @override
   _FirstUpPageState createState() => _FirstUpPageState();
 }
@@ -14,16 +16,16 @@ class _FirstUpPageState extends State<FirstUpPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
+          const Text(
             'Choose Your Age',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -39,7 +41,7 @@ class _FirstUpPageState extends State<FirstUpPage> {
                   });
                 },
               ),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
               AgeOption(
                 text: '17-24',
                 imagePath: 'lib/images/age2.png',
@@ -51,7 +53,7 @@ class _FirstUpPageState extends State<FirstUpPage> {
                   });
                 },
               ),
-              SizedBox(width: 20),
+              const SizedBox(width: 20),
               AgeOption(
                 text: '25-40',
                 imagePath: 'lib/images/age3.png',
@@ -65,7 +67,7 @@ class _FirstUpPageState extends State<FirstUpPage> {
               ),
             ],
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -73,32 +75,32 @@ class _FirstUpPageState extends State<FirstUpPage> {
                 onPressed: () {
                   // منطق التخطي
                 },
-                child: Text(
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  backgroundColor: Colors.grey,
+                  padding: const EdgeInsets.all(20),
+                ),
+                child: const Text(
                   'Skip',
                   style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  shape: CircleBorder(),
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.all(20),
                 ),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => LearningRemindersPage()),
+                    MaterialPageRoute(builder: (context) => const LearningRemindersPage()),
                   );
                 },
-                child: Text(
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.all(35),
+                  textStyle: const TextStyle(fontSize: 20),
+                ),
+                child: const Text(
                   'Continue',
                   style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  shape: CircleBorder(),
-                  backgroundColor: Colors.orange,
-                  padding: EdgeInsets.all(35),
-                  textStyle: TextStyle(fontSize: 20),
                 ),
               ),
             ],
@@ -116,7 +118,7 @@ class AgeOption extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  AgeOption({
+  const AgeOption({super.key, 
     required this.text,
     required this.imagePath,
     required this.height,
@@ -133,7 +135,7 @@ class AgeOption extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Color(0xFFE0A800),
+          color: const Color(0xFFE0A800),
         ),
         child: Column(
           children: <Widget>[
@@ -141,7 +143,7 @@ class AgeOption extends StatelessWidget {
               height: height * 0.1,
               decoration: BoxDecoration(
                 color: isSelected ? Colors.blue : Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
             ),
             Expanded(
@@ -153,10 +155,10 @@ class AgeOption extends StatelessWidget {
                     height: height * 0.4,
                     fit: BoxFit.contain,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     text,
-                    style: TextStyle(fontSize: 18, color: Colors.blue),
+                    style: const TextStyle(fontSize: 18, color: Colors.blue),
                   ),
                 ],
               ),

@@ -4,6 +4,8 @@ import 'navigation_page.dart'; // تأكد من استيراد صفحة Navigati
 import 'student_data_entry.dart';
 
 class SignUpStd extends StatefulWidget {
+  const SignUpStd({super.key});
+
   @override
   _SignUpStdState createState() => _SignUpStdState();
 }
@@ -19,7 +21,7 @@ class _SignUpStdState extends State<SignUpStd> {
       // Check if email and password are provided
       if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill in both fields')),
+          const SnackBar(content: Text('Please fill in both fields')),
         );
         return;
       }
@@ -32,12 +34,12 @@ class _SignUpStdState extends State<SignUpStd> {
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login Successful')),
+        const SnackBar(content: Text('Login Successful')),
       );
 
       // Navigate to the NavigationPage after successful login
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => NavigationPage()), // الانتقال إلى صفحة NavigationPage
+        MaterialPageRoute(builder: (context) => const NavigationPage()), // الانتقال إلى صفحة NavigationPage
       );
 
     } catch (e) {
@@ -74,9 +76,9 @@ class _SignUpStdState extends State<SignUpStd> {
         children: <Widget>[
           // Header
           Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C9AAA),
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1C9AAA),
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30.0),
                 bottomRight: Radius.circular(30.0),
               ),
@@ -156,7 +158,7 @@ class _SignUpStdState extends State<SignUpStd> {
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => StudentDataEntry()),
+                        MaterialPageRoute(builder: (context) => const StudentDataEntry()),
                       );
                     },
                     child: const Text(

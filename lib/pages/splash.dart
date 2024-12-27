@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'first_open1.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -10,12 +12,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 5), _navigateToFirstOpen);
+    Future.delayed(const Duration(seconds: 5), _navigateToFirstOpen);
   }
 
   void _navigateToFirstOpen() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => FirstOpen1()),
+      MaterialPageRoute(builder: (context) => const FirstOpen1()),
     );
   }
 

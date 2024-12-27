@@ -1,4 +1,4 @@
-name: untitled2
+name: graduation
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -33,7 +33,11 @@ dependencies:
   firebase_core: ^3.9.0
   firebase_auth: ^5.3.4
   cloud_firestore: ^5.6.0
-
+  shared_preferences: ^2.1.1
+  image_picker: ^1.1.2
+  permission_handler: ^10.2.0
+  firebase_storage: ^12.3.7
+  supabase_flutter: 2.8.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

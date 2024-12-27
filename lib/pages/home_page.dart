@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'course_details_page.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +19,9 @@ class HomePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 20,
               backgroundImage: AssetImage('assets/profile.jpg'),
@@ -87,7 +87,7 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [Colors.black54, Colors.transparent],
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,

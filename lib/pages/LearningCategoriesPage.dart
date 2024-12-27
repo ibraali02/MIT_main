@@ -3,6 +3,8 @@ import 'dart:math';
 import 'navigation_page.dart';
 
 class TechCategoriesPage extends StatefulWidget {
+  const TechCategoriesPage({super.key});
+
   @override
   _TechCategoriesPageState createState() => _TechCategoriesPageState();
 }
@@ -14,14 +16,14 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(''), // إخفاء العنوان في الـ AppBar
+        title: const Text(''), // إخفاء العنوان في الـ AppBar
       ),
       body: Container(
         color: Colors.white, // خلفية الصفحة بيضاء
         child: Stack(
           children: [
             // السؤال فوق الدوائر
-            Positioned(
+            const Positioned(
               top: 50, // المسافة من أعلى الصفحة
               left: 10, // المسافة من اليسار
               child: Text(
@@ -61,7 +63,7 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NavigationPage(),
+                      builder: (context) => const NavigationPage(),
                     ),
                   );
                 },
@@ -69,7 +71,7 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
                   radius: 50,
                   backgroundColor:
                   selectedIndex == 7 ? Colors.blue : Colors.orange,
-                  child: Text(
+                  child: const Text(
                     'comntunuio',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -107,7 +109,7 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white, // النص داخل الدائرة باللون الأبيض

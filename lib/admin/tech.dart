@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class MyPage extends StatefulWidget {
+  const MyPage({super.key});
+
   @override
   _MyPageState createState() => _MyPageState();
 }
@@ -29,16 +31,16 @@ class _MyPageState extends State<MyPage> {
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Data saved successfully!')));
+            const SnackBar(content: Text('Data saved successfully!')));
       } catch (e) {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving data')));
+            const SnackBar(content: Text('Error saving data')));
       }
     } else {
       // Show error if fields are empty
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill all fields')));
+          const SnackBar(content: Text('Please fill all fields')));
     }
   }
 
@@ -46,7 +48,7 @@ class _MyPageState extends State<MyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Save User Data'),
+        title: const Text('Save User Data'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,17 +57,17 @@ class _MyPageState extends State<MyPage> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveData,  // Call the save function
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

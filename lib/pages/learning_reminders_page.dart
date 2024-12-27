@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'LearningCategoriesPage.dart';
 
 class LearningRemindersPage extends StatefulWidget {
+  const LearningRemindersPage({super.key});
+
   @override
   _LearningRemindersPageState createState() => _LearningRemindersPageState();
 }
@@ -11,8 +13,8 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
   int selectedHour = 14; // الساعة الافتراضية
   int selectedMinute = 30; // الدقيقة الافتراضية
   Set<String> selectedDays = {}; // لتخزين الأيام المحددة
-  final Color defaultColor = Color(0xFFEFAC52); // اللون الافتراضي
-  final Color selectedColor = Color(0xFF0096AB); // اللون عند التحديد
+  final Color defaultColor = const Color(0xFFEFAC52); // اللون الافتراضي
+  final Color selectedColor = const Color(0xFF0096AB); // اللون عند التحديد
 
   @override
   Widget build(BuildContext context) {
@@ -30,16 +32,16 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context); // العودة للصفحة السابقة
                     },
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // إضافة النص "Set up learning reminders" أعلى الصفحة بحجم أكبر وبولد
-              Text(
+              const Text(
                 'Set up learning reminders',
                 style: TextStyle(
                   fontSize: 30, // حجم أكبر
@@ -48,35 +50,35 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                 ),
                 textAlign: TextAlign.left, // محاذاة النص لليسار
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // إضافة النص الحالي ليكون محاذيًا لليسار
-              Text(
+              const Text(
                 'Tell us when you want to learn and we will send push notifications to remind you.',
                 textAlign: TextAlign.left, // محاذاة النص لليسار
                 style: TextStyle(fontSize: 16, color: Colors.black), // تغيير اللون إلى الأسود
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               // تعديل الأيام بحيث يمكن تمريرها أفقيًا
-              Container(
+              SizedBox(
                 height: 80, // زيادة ارتفاع الحاوية
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: <Widget>[
                     _buildDayButton('Thu'),
-                    SizedBox(width: 20), // إضافة مسافة بين الأيام
+                    const SizedBox(width: 20), // إضافة مسافة بين الأيام
                     _buildDayButton('Fri'),
-                    SizedBox(width: 20), // إضافة مسافة بين الأيام
+                    const SizedBox(width: 20), // إضافة مسافة بين الأيام
                     _buildDayButton('Sat'),
-                    SizedBox(width: 20), // إضافة مسافة بين الأيام
+                    const SizedBox(width: 20), // إضافة مسافة بين الأيام
                     _buildDayButton('Sun'),
-                    SizedBox(width: 20), // إضافة مسافة بين الأيام
+                    const SizedBox(width: 20), // إضافة مسافة بين الأيام
                     _buildDayButton('Mon'),
-                    SizedBox(width: 20), // إضافة مسافة بين الأيام
+                    const SizedBox(width: 20), // إضافة مسافة بين الأيام
                     _buildDayButton('Tue'),
                   ],
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Container(
                 height: 250,
                 width: double.infinity,
@@ -99,7 +101,7 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                             });
                           },
                         ),
-                        Text(
+                        const Text(
                           ":",
                           style: TextStyle(
                             fontSize: 30,
@@ -118,7 +120,7 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                         ),
                       ],
                     ),
-                    Positioned(
+                    const Positioned(
                       top: 75,
                       left: 0,
                       right: 0,
@@ -127,7 +129,7 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                         thickness: 2,
                       ),
                     ),
-                    Positioned(
+                    const Positioned(
                       bottom: 75,
                       left: 0,
                       right: 0,
@@ -139,7 +141,7 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -147,27 +149,27 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
                     onPressed: () {
                       // Skip logic
                     },
-                    child: Text('Skip', style: TextStyle(color: Colors.black)),
                     style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
+                      shape: const CircleBorder(),
                       backgroundColor: Colors.greenAccent,
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                     ),
+                    child: const Text('Skip', style: TextStyle(color: Colors.black)),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       // Continue logic
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TechCategoriesPage()),
+                        MaterialPageRoute(builder: (context) => const TechCategoriesPage()),
                       );
-                    },
-                    child: Text('Continue', style: TextStyle(color: Colors.white, fontSize: 22)), // Increased font size
+                    }, // Increased font size
                     style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
+                      shape: const CircleBorder(),
                       backgroundColor: Colors.blue,
-                      padding: EdgeInsets.all(40), // Increased padding for a larger button
+                      padding: const EdgeInsets.all(40), // Increased padding for a larger button
                     ),
+                    child: const Text('Continue', style: TextStyle(color: Colors.white, fontSize: 22)),
                   ),
                 ],
               ),
@@ -191,14 +193,14 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
         });
       },
       child: Container(
-        padding: EdgeInsets.all(20), // زيادة الحشو داخل الأزرار
+        padding: const EdgeInsets.all(20), // زيادة الحشو داخل الأزرار
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: isSelected ? selectedColor : defaultColor, // اللون عند التحديد يصبح 0096AB
         ),
         child: Text(
           day,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             color: Colors.black, // النص يصبح باللون الأسود
           ),
@@ -216,7 +218,7 @@ class _LearningRemindersPageState extends State<LearningRemindersPage> {
       child: ListWheelScrollView.useDelegate(
         itemExtent: 70,
         perspective: 0.005,
-        physics: FixedExtentScrollPhysics(),
+        physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onChanged,
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) {

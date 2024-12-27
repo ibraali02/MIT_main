@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'first_up.dart';
 
 class StudentDataEntry extends StatefulWidget {
+  const StudentDataEntry({super.key});
+
   @override
   _StudentDataEntryState createState() => _StudentDataEntryState();
 }
@@ -25,7 +27,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
       // Validate if fields are empty or passwords do not match
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Passwords do not match!')),
+          const SnackBar(content: Text('Passwords do not match!')),
         );
         return;
       }
@@ -36,7 +38,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
           _selectedCity == null ||
           _selectedGender == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill in all fields!')),
+          const SnackBar(content: Text('Please fill in all fields!')),
         );
         return;
       }
@@ -62,15 +64,15 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Congratulations!'),
-            content: Text('Your account has been created successfully!'),
+            title: const Text('Congratulations!'),
+            content: const Text('Your account has been created successfully!'),
             actions: [
               TextButton(
-                child: Text('Done'),
+                child: const Text('Done'),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => FirstUpPage()),
+                    MaterialPageRoute(builder: (context) => const FirstUpPage()),
                   );
                 },
               ),
@@ -90,37 +92,37 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Student Data Entry'),
+        title: const Text('Student Data Entry'),
         backgroundColor: Colors.blue,
       ),
       body: Container(
         color: Colors.white,
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
               _buildTextField(_fullNameController, 'Full Name'),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildTextField(_emailController, 'Email'),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildTextField(_phoneController, 'Phone Number'),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildDropdownField('City', ['Miserata', 'Benghazi', 'Tripoli'], (value) {
                 setState(() {
                   _selectedCity = value;
                 });
               }),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildDropdownField('Gender', ['Male', 'Female'], (value) {
                 setState(() {
                   _selectedGender = value;
                 });
               }),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildPasswordField(_passwordController, 'Password'),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _buildPasswordField(_confirmPasswordController, 'Confirm Password'),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -129,7 +131,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
                   ),
                 ),
                 onPressed: _registerUser,
-                child: Text(
+                child: const Text(
                   'Submit',
                   style: TextStyle(fontSize: 20, color: Colors.white),
                 ),

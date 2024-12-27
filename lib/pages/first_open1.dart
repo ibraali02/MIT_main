@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'stutech.dart';
 
 class FirstOpen1 extends StatelessWidget {
+  const FirstOpen1({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('lib/images/first1.jpg'),
             fit: BoxFit.cover,
@@ -23,13 +25,13 @@ class FirstOpen1 extends StatelessWidget {
                 radius: 30,
                 backgroundColor: Colors.orange,
                 child: IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.arrow_forward,
                     color: Colors.white,
                   ),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => LoginPage()),
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
                     );
                   },
                 ),
