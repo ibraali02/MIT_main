@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../pages/course_details_page.dart';
+import 'course_details_page.dart';
 import 'AddCoursePage.dart';
 
 class HomePage extends StatelessWidget {
@@ -85,6 +85,7 @@ class HomePage extends StatelessWidget {
               course['details'],
               course['teacher'],
               course['start_date'],
+              courses[index].id,  // Pass courseId here
             );
           },
         );
@@ -98,19 +99,28 @@ class HomePage extends StatelessWidget {
       String title,
       String details,
       String teacher,
-      String startDate) {
+      String startDate,
+      String courseId,  // Added courseId parameter
+      ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CourseDetailsPage(courseName: title),
+            builder: (context) => CourseDetailsPage(
+              courseId: courseId,  // Pass courseId to CourseDetailsPage
+              courseName: title,
+              imageUrl: imageUrl,
+              details: details,
+              teacher: teacher,
+              startDate: startDate,
+            ),
           ),
         );
       },
       child: Container(
         width: double.infinity,
-        height: 180, // زيادة الارتفاع ليتسع للمعلومات الإضافية
+        height: 180,
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),

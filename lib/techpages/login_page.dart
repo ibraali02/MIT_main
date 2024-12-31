@@ -30,17 +30,15 @@ class _LoginPageState extends State<LoginPage> {
             .where('username', isEqualTo: normalizedUsername)
             .get();
 
-        print('Query result: ${snapshot.docs}'); // Debugging: Check the result
-
         if (snapshot.docs.isNotEmpty) {
           var userDoc = snapshot.docs[0]; // Get the first document
           String documentId = userDoc.id; // Get the document ID
 
           // Check if the password matches
           if (userDoc['password'] == password) {
-            // Save document ID in SharedPreferences
+            // Save document ID as token in SharedPreferences
             SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('documentId', documentId);
+            await prefs.setString('token', documentId);
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Login successful!')),

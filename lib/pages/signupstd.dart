@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'navigation_page.dart'; // تأكد من استيراد صفحة NavigationPage
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'navigation_page.dart'; // Ensure this is the correct import for NavigationPage
 import 'student_data_entry.dart';
 
 class SignUpStd extends StatefulWidget {
@@ -13,7 +14,7 @@ class SignUpStd extends StatefulWidget {
 class _SignUpStdState extends State<SignUpStd> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Function to handle user login
   void loginUser() async {
@@ -26,11 +27,34 @@ class _SignUpStdState extends State<SignUpStd> {
         return;
       }
 
-      // Attempt to sign in with email and password
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      // Fetch the user data from Firestore
+      var userQuerySnapshot = await _firestore
+          .collection('students') // Assuming 'students' collection contains user data
+          .where('email', isEqualTo: emailController.text.trim())
+          .get();
+
+      // Check if user exists
+      if (userQuerySnapshot.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No user found with this email.')),
+        );
+        return;
+      }
+
+      // Get the user data from Firestore
+      var userData = userQuerySnapshot.docs.first.data();
+
+      // Verify the password
+      if (userData['password'] != passwordController.text.trim()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Incorrect password.')),
+        );
+        return;
+      }
+
+      // Store the user Document ID (UID) in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_document_id', userQuerySnapshot.docs.first.id); // Store Document ID as token
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -39,32 +63,13 @@ class _SignUpStdState extends State<SignUpStd> {
 
       // Navigate to the NavigationPage after successful login
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const NavigationPage()), // الانتقال إلى صفحة NavigationPage
+        MaterialPageRoute(builder: (context) => const NavigationPage()), // Navigate to NavigationPage
       );
 
     } catch (e) {
-      // Handle Firebase-specific errors
-      String errorMessage = 'Error: ${e.toString()}';
-      if (e is FirebaseAuthException) {
-        switch (e.code) {
-          case 'user-not-found':
-            errorMessage = 'No user found for that email.';
-            break;
-          case 'wrong-password':
-            errorMessage = 'Incorrect password.';
-            break;
-          case 'invalid-email':
-            errorMessage = 'The email address is not valid.';
-            break;
-          default:
-            errorMessage = 'An unexpected error occurred.';
-            break;
-        }
-      }
-
-      // Show error message
+      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
   }

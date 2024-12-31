@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'first_up.dart';
 
@@ -11,7 +10,6 @@ class StudentDataEntry extends StatefulWidget {
 }
 
 class _StudentDataEntryState extends State<StudentDataEntry> {
-  final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
   final _fullNameController = TextEditingController();
@@ -19,6 +17,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _registrationNumberController = TextEditingController();
   String? _selectedCity;
   String? _selectedGender;
 
@@ -35,6 +34,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
       if (_fullNameController.text.isEmpty ||
           _emailController.text.isEmpty ||
           _phoneController.text.isEmpty ||
+          _registrationNumberController.text.isEmpty ||
           _selectedCity == null ||
           _selectedGender == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -43,19 +43,20 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
         return;
       }
 
-      // Register the user with Firebase Authentication
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      // Create a random registration number if not entered
+      String registrationNumber = _registrationNumberController.text.isNotEmpty
+          ? _registrationNumberController.text
+          : 'REG${DateTime.now().millisecondsSinceEpoch}';
 
       // Save user data to Firestore
-      await _firestore.collection('students').doc(userCredential.user!.uid).set({
+      await _firestore.collection('students').add({
         'fullName': _fullNameController.text.trim(),
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
+        'registrationNumber': registrationNumber,
         'city': _selectedCity,
         'gender': _selectedGender,
+        'password': _passwordController.text.trim(), // Save the password as plain text (consider hashing it)
         'createdAt': FieldValue.serverTimestamp(), // Adds timestamp for the creation time
       });
 
@@ -81,7 +82,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
         },
       );
     } catch (e) {
-      // Handle errors, e.g., user already exists
+      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -106,6 +107,8 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
               _buildTextField(_emailController, 'Email'),
               const SizedBox(height: 20),
               _buildTextField(_phoneController, 'Phone Number'),
+              const SizedBox(height: 20),
+              _buildTextField(_registrationNumberController, 'Registration Number'),
               const SizedBox(height: 20),
               _buildDropdownField('City', ['Miserata', 'Benghazi', 'Tripoli'], (value) {
                 setState(() {
