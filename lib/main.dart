@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue, // Define a primary color for the app
       ),
-      home: SignUpStd(), // Set the home page to LoginPage
+      home: NavigationPage(), // Set the home page to LoginPage
     );
   }
 }

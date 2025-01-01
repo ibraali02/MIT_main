@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'courses/ExamPage.dart';
 import 'courses/comments_page.dart';
 import 'courses/lectures_page.dart';
@@ -21,16 +22,25 @@ class CourseDetailsPage extends StatefulWidget {
 class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Sample function to simulate fetching course details based on courseId
+  // Fetch course details from Firestore
   Future<Map<String, String>> fetchCourseDetails(String courseId) async {
-    await Future.delayed(Duration(seconds: 2)); // Simulate a network call
-    // Return dummy data for now
-    return {
-      'courseName': 'Course Name for $courseId',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'details': 'Detailed information about the course $courseId.',
-      'teacher': 'Teacher for $courseId',
-    };
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('courses').doc(courseId).get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        return {
+          'courseName': data['title'] ?? 'No Title',
+          'imageUrl': data['image_url'] ?? '',
+          'details': data['details'] ?? 'No details available',
+          'teacher': data['teacher'] ?? 'No teacher info',
+        };
+      } else {
+        throw 'Course not found';
+      }
+    } catch (e) {
+      throw 'Error fetching course data: $e';
+    }
   }
 
   @override
@@ -54,6 +64,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
           return Scaffold(
             appBar: AppBar(
               title: Text('Loading...'),
+              backgroundColor: Color(0xFF0096AB), // Blue color
             ),
             body: Center(child: CircularProgressIndicator()),
           );
@@ -61,6 +72,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
           return Scaffold(
             appBar: AppBar(
               title: Text('Error'),
+              backgroundColor: Color(0xFF0096AB), // Blue color
             ),
             body: Center(child: Text('Error loading course details')),
           );
@@ -68,6 +80,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
           return Scaffold(
             appBar: AppBar(
               title: Text('No Data'),
+              backgroundColor: Color(0xFF0096AB), // Blue color
             ),
             body: Center(child: Text('No course data available')),
           );
@@ -82,36 +95,51 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(courseName),
-            backgroundColor: Colors.green,
+            title: Text(
+              courseName,
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // Make the title bold
+                color: Colors.white, // Set text color to white
+              ),
+            ),
+            backgroundColor: Color(0xFF0096AB), // Blue color
+            iconTheme: IconThemeData(
+              color: Color(0xFFEFAC52), // Orange color for the back icon
+            ),
             bottom: TabBar(
               controller: _tabController,
+              indicatorColor: Color(0xFFEFAC52), // Orange color for indicator
+              unselectedLabelColor: Colors.white, // White color for unselected tab
+              labelColor: Color(0xFFEFAC52), // Orange color for selected tab
               tabs: const [
-                Tab(text: 'Details'),
-                Tab(text: 'Comments'),
-                Tab(text: 'Lectures'),
-                Tab(text: 'Videos'),
-                Tab(text: 'Ratings'),
-                Tab(text: 'Exams'), // Added Exams tab
+                Tab(icon: Icon(Icons.info_outline)), // Icon for Details
+                Tab(icon: Icon(Icons.comment)), // Icon for Comments
+                Tab(icon: Icon(Icons.picture_as_pdf_rounded)), // Icon for Lectures
+                Tab(icon: Icon(Icons.video_library)), // Icon for Videos
+                Tab(icon: Icon(Icons.star_border)), // Icon for Ratings
+                Tab(icon: Icon(Icons.assignment)), // Icon for Exams
               ],
             ),
           ),
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              CourseDetailsTab(
-                courseId: widget.courseId,
-                courseName: courseName,
-                imageUrl: imageUrl,
-                details: details,
-                teacher: teacher,
-              ),
-              CommentsPage(courseId: widget.courseId),
-              LecturesPage(courseId: widget.courseId),
-              VideosPage(courseId: widget.courseId),
-              RatingsPage(courseId: widget.courseId),
-              ExamsPage(courseId: widget.courseId), // Added ExamsPage
-            ],
+          body: Container(
+            color: Colors.white, // White background for the body
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                CourseDetailsTab(
+                  courseId: widget.courseId,
+                  courseName: courseName,
+                  imageUrl: imageUrl,
+                  details: details,
+                  teacher: teacher,
+                ),
+                CommentsPage(courseId: widget.courseId),
+                LecturesPage(courseId: widget.courseId),
+                VideosPage(courseId: widget.courseId),
+                RatingsPage(courseId: widget.courseId),
+                ExamsPage(courseId: widget.courseId), // Added ExamsPage
+              ],
+            ),
           ),
         );
       },
@@ -138,46 +166,59 @@ class CourseDetailsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0), // Increased padding for better spacing
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            imageUrl,
-            width: double.infinity,
-            height: 200,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            courseName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15), // Rounded corners for the image
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 250, // Increased height for better visuals
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Teacher: $teacher',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
+          const SizedBox(height: 20),
+
+          // Course details inside a Card widget
+          Card(
+            elevation: 5, // Adds shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // Rounded corners for the card
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            details,
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Course ID (Token): $courseId',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0), // Padding inside the card
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    courseName,
+                    style: const TextStyle(
+                      fontSize: 28, // Increased font size for course name
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Instructor: $teacher',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    details,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
