@@ -11,117 +11,13 @@ class RatingsPage extends StatefulWidget {
 }
 
 class _RatingsPageState extends State<RatingsPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ratings'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      AddRatingPage(courseId: widget.courseId),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('courses')
-            .doc(widget.courseId)
-            .collection('ratings')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No ratings available.'));
-          }
-
-          final ratings = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: ratings.length,
-            itemBuilder: (context, index) {
-              final rating = ratings[index];
-              final username = rating['username'];
-              final contentScore = rating['contentScore'];
-              final explanationScore = rating['explanationScore'];
-              final materialScore = rating['materialScore'];
-              final overallScore = rating['overallScore'];
-              final comment = rating['comment'];
-
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text(username),
-                  subtitle: Text(
-                    'Content: $contentScore\nExplanation: $explanationScore\nMaterial: $materialScore\nOverall: $overallScore\n$comment',
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class AddRatingPage extends StatefulWidget {
-  final String courseId;
-
-  const AddRatingPage({super.key, required this.courseId});
-
-  @override
-  _AddRatingPageState createState() => _AddRatingPageState();
-}
-
-class _AddRatingPageState extends State<AddRatingPage> {
-  final TextEditingController usernameController = TextEditingController();
   final TextEditingController commentController = TextEditingController();
 
+  // تعريف المتغيرات الخاصة بالتقييمات
   double contentScore = 3.0;
   double explanationScore = 3.0;
   double materialScore = 3.0;
   double overallScore = 3.0;
-
-  Future<void> _saveRating(BuildContext context) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('courses')
-          .doc(widget.courseId)
-          .collection('ratings')
-          .add({
-        'username': usernameController.text,
-        'contentScore': contentScore,
-        'explanationScore': explanationScore,
-        'materialScore': materialScore,
-        'overallScore': overallScore,
-        'comment': commentController.text,
-        'createdAt': Timestamp.now(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rating submitted successfully')),
-      );
-
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving rating: $e')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,11 +30,6 @@ class _AddRatingPageState extends State<AddRatingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(labelText: 'Your Name'),
-            ),
-            const SizedBox(height: 20),
             const Text('Content Score:'),
             Slider(
               value: contentScore,
@@ -209,5 +100,33 @@ class _AddRatingPageState extends State<AddRatingPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _saveRating(BuildContext context) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('courses')
+          .doc(widget.courseId)
+          .collection('ratings')
+          .add({
+        'username': 'Anonymous',  // Example: Use a predefined username or login data
+        'contentScore': contentScore,
+        'explanationScore': explanationScore,
+        'materialScore': materialScore,
+        'overallScore': overallScore,
+        'comment': commentController.text,
+        'createdAt': Timestamp.now(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rating submitted successfully')),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving rating: $e')),
+      );
+    }
   }
 }

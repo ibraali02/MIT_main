@@ -55,10 +55,7 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Comments'),
-        backgroundColor: Colors.green,
-      ),
+
       body: Column(
         children: [
           Expanded(
@@ -98,8 +95,8 @@ class _CommentsPageState extends State<CommentsPage> {
                         : 'Unknown time';
 
                     return ListTile(
-                      title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(commentText),
+                      title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0096AB))), // Text color for user name
+                      subtitle: Text(commentText, style: const TextStyle(color: Color(0xFF0096AB))), // Text color for comment text
                       trailing: Text(
                         formattedTime.split('.')[0], // Displays formatted time without milliseconds.
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -122,13 +119,17 @@ class _CommentsPageState extends State<CommentsPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      hintStyle: TextStyle(color: Color(0xFF0096AB)), // Hint text color
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _addComment,
-                  child: const Text('Add'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(const Color(0xFFEFAC52)), // Button color
+                  ),
+                  child: const Text('Add', style: TextStyle(color: Colors.white)), // Text color
                 ),
               ],
             ),

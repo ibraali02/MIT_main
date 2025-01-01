@@ -46,7 +46,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this); // Updated length
+    _tabController = TabController(length: 5, vsync: this); // Updated length to 5 (removing the rating tab)
   }
 
   @override
@@ -106,6 +106,21 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
             iconTheme: IconThemeData(
               color: Color(0xFFEFAC52), // Orange color for the back icon
             ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.star_border), // Rating icon
+                color: Color(0xFFEFAC52), // Orange color for the icon
+                onPressed: () {
+                  // Navigate to RatingsPage or show rating dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RatingsPage(courseId: widget.courseId),
+                    ),
+                  );
+                },
+              ),
+            ],
             bottom: TabBar(
               controller: _tabController,
               indicatorColor: Color(0xFFEFAC52), // Orange color for indicator
@@ -116,7 +131,6 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
                 Tab(icon: Icon(Icons.comment)), // Icon for Comments
                 Tab(icon: Icon(Icons.picture_as_pdf_rounded)), // Icon for Lectures
                 Tab(icon: Icon(Icons.video_library)), // Icon for Videos
-                Tab(icon: Icon(Icons.star_border)), // Icon for Ratings
                 Tab(icon: Icon(Icons.assignment)), // Icon for Exams
               ],
             ),
@@ -136,7 +150,6 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
                 CommentsPage(courseId: widget.courseId),
                 LecturesPage(courseId: widget.courseId),
                 VideosPage(courseId: widget.courseId),
-                RatingsPage(courseId: widget.courseId),
                 ExamsPage(courseId: widget.courseId), // Added ExamsPage
               ],
             ),

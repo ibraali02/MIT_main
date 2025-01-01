@@ -45,8 +45,8 @@ class _NavigationPageState extends State<NavigationPage> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.grey[600],
+          selectedItemColor: const Color(0xFFEFAC52), // Color for selected items
+          unselectedItemColor: const Color(0xFF0096AB), // Color for unselected items
           showUnselectedLabels: true,
           selectedFontSize: 14,
           unselectedFontSize: 12,

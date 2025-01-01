@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'course_details_page.dart';
+
 class CurrentCoursesPage extends StatefulWidget {
   const CurrentCoursesPage({super.key});
 
@@ -26,7 +28,6 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
       throw Exception("User token not found. Please log in again.");
     }
 
-    // Fetch enrolled courses from Firestore
     final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
         .collection('students')
         .doc(userToken)
@@ -35,7 +36,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
 
     return snapshot.docs.map((doc) {
       return {
-        'id': doc.id, // Store the document ID for deletion
+        'id': doc.id,
         ...doc.data(),
       };
     }).toList();
@@ -52,7 +53,6 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
     final DocumentReference studentRef =
     FirebaseFirestore.instance.collection('students').doc(userToken);
 
-    // Check if the course is already completed
     final QuerySnapshot completedCourses = await studentRef
         .collection('completed_courses')
         .where('course_id', isEqualTo: courseId)
@@ -65,23 +65,17 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
       return;
     }
 
-    // Add course to completed_courses
     await studentRef.collection('completed_courses').add({
       'course_id': courseId,
       'completed_at': FieldValue.serverTimestamp(),
     });
 
-    // Remove course from course_enrolled
-    await studentRef
-        .collection('course_enrolled')
-        .doc(documentId)
-        .delete();
+    await studentRef.collection('course_enrolled').doc(documentId).delete();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Course $courseId marked as completed and removed from enrolled courses!')),
+      SnackBar(content: Text('Course $courseId marked as completed!')),
     );
 
-    // Refresh the courses list
     setState(() {
       _coursesFuture = _fetchEnrolledCourses();
     });
@@ -90,9 +84,26 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Current Courses'),
-        backgroundColor: Colors.blueAccent,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: AppBar(
+            backgroundColor: const Color(0xFF0096AB),
+            centerTitle: true,
+            title: const Text(
+              'Current Courses',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _coursesFuture,
@@ -113,7 +124,11 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
             return const Center(
               child: Text(
                 'No enrolled courses found.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0096AB),
+                ),
               ),
             );
           }
@@ -124,7 +139,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
               final course = courses[index];
               final courseName = course['course_name'] ?? 'Unknown Course';
               final courseId = course['course_id'] ?? 'N/A';
-              final documentId = course['id']; // Document ID for deletion
+              final documentId = course['id'];
               final enrolledAt = course['enrolled_at']?.toDate().toString() ?? 'N/A';
 
               return Card(
@@ -132,13 +147,38 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
                 child: ListTile(
                   title: Text(
                     courseName,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0096AB),
+                    ),
                   ),
-                  subtitle: Text('Course ID: $courseId\nEnrolled At: $enrolledAt'),
+                  subtitle: Text(
+                    'Course ID: $courseId\nEnrolled At: $enrolledAt',
+                    style: const TextStyle(color: Color(0xFFEFAC52)),
+                  ),
                   trailing: ElevatedButton(
                     onPressed: () => _markCourseAsCompleted(courseId, documentId),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEFAC52), // لون الخلفية
+                      foregroundColor: const Color(0xFFffffff), // لون النص
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8), // زوايا مستديرة
+                      ),
+                    ),
                     child: const Text('Mark as Completed'),
                   ),
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CourseDetailsPage(
+                          courseId: courseId,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               );
             },

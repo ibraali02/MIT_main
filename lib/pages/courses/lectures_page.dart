@@ -18,22 +18,7 @@ class _LecturesPageState extends State<LecturesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(''),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UploadLecturePage(courseId: widget.courseId),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -62,11 +47,18 @@ class _LecturesPageState extends State<LecturesPage> {
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
+                color: const Color(0xFFF5F5F5), // Card background color
                 child: ListTile(
-                  title: Text(lectureName),
-                  subtitle: Text('Professor: $professorName\n$description'),
+                  title: Text(
+                    lectureName,
+                    style: const TextStyle(color: Color(0xFF0096AB), fontWeight: FontWeight.bold), // Text color for lecture name
+                  ),
+                  subtitle: Text(
+                    'Professor: $professorName\n$description',
+                    style: const TextStyle(color: Colors.black), // Text color for description
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.picture_as_pdf),
+                    icon: const Icon(Icons.picture_as_pdf, color: Color(0xFFEFAC52)), // Set color for PDF icon
                     onPressed: () async {
                       if (fileUrl.isNotEmpty) {
                         try {
@@ -197,7 +189,8 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload Lecture'),
+        backgroundColor: const Color(0xFF0096AB), // Set AppBar color
+        title: const Text('Upload Lecture', style: TextStyle(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -225,12 +218,18 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _uploadPdf(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFAC52), // Button color
+                  ),
                   child: const Text('Save Lecture'),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEFAC52), // Button color
+              ),
               child: const Text('Pick a PDF file'),
             ),
           ],

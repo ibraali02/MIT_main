@@ -237,16 +237,7 @@ class CourseRegistrationPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Icon(Icons.star, color: Color(0xFFEFAC52)),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Ratings: $numberOfRatings',
-                                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                                  ),
-                                ],
-                              ),
+
                             ],
                           ),
                           const SizedBox(height: 12),

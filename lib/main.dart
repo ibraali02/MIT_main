@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:graduation/pages/home_page.dart';
-import 'package:graduation/pages/navigation_page.dart';
+import 'package:graduation/techpages/navigation_page.dart';
 import 'package:graduation/pages/signupstd.dart';
 import 'package:graduation/techpages/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue, // Define a primary color for the app
       ),
-      home: NavigationPage(), // Set the home page to LoginPage
+      home: LoginPage(), // Set the home page to LoginPage
     );
   }
 }

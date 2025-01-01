@@ -62,10 +62,27 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile Page'),
-        backgroundColor: const Color(0xFF0096AB), // Color for AppBar
-        elevation: 0,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70.0),
+        child: AppBar(
+          backgroundColor: const Color(0xFF0096AB), // Color for AppBar
+          elevation: 4.0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          title: const Text(
+            'Profile',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Set the text color to white
+            ),
+          ),
+          centerTitle: true, // Ensures the title is centered
+        ),
       ),
       backgroundColor: Colors.white, // Set background color to white
       body: FutureBuilder<Map<String, dynamic>>(

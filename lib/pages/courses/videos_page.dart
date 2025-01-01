@@ -18,23 +18,7 @@ class _VideosPageState extends State<VideosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // إزالة سهم الرجوع
-        title: const Text('Videos'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UploadVideoPage(courseId: widget.courseId),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -66,7 +50,7 @@ class _VideosPageState extends State<VideosPage> {
                   title: Text(videoName),
                   subtitle: Text(description),
                   trailing: IconButton(
-                    icon: const Icon(Icons.play_circle_fill),
+                    icon: const Icon(Icons.play_circle_fill, color: Color(0xFFEFAC52)), // Gold color for icon
                     onPressed: () async {
                       if (fileUrl.isNotEmpty) {
                         try {
@@ -95,6 +79,7 @@ class _VideosPageState extends State<VideosPage> {
     );
   }
 }
+
 class UploadVideoPage extends StatefulWidget {
   final String courseId;
 
@@ -195,6 +180,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Upload Video'),
+        backgroundColor: const Color(0xFF0096AB), // Blue color for app bar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -203,11 +189,17 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
           children: [
             TextField(
               controller: videoNameController,
-              decoration: const InputDecoration(labelText: 'Video Name'),
+              decoration: const InputDecoration(
+                labelText: 'Video Name',
+                labelStyle: TextStyle(color: Color(0xFF0096AB)), // Blue color for label
+              ),
             ),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                labelStyle: TextStyle(color: Color(0xFF0096AB)), // Blue color for label
+              ),
             ),
             const SizedBox(height: 20),
             _selectedFile != null
@@ -218,12 +210,18 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _uploadVideo(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFAC52), // Gold color for button
+                  ),
                   child: const Text('Save Video'),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEFAC52), // Gold color for button
+              ),
               child: const Text('Pick a Video file'),
             ),
           ],

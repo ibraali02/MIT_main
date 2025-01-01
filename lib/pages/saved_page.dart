@@ -26,7 +26,6 @@ class _SavedPageState extends State<SavedPage> {
       throw Exception("User token not found. Please log in again.");
     }
 
-    // Fetch saved courses from Firestore
     final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
         .collection('students')
         .doc(userToken)
@@ -35,7 +34,7 @@ class _SavedPageState extends State<SavedPage> {
 
     return snapshot.docs.map((doc) {
       return {
-        'id': doc.id, // Store the document ID for deletion
+        'id': doc.id,
         ...doc.data(),
       };
     }).toList();
@@ -52,14 +51,12 @@ class _SavedPageState extends State<SavedPage> {
     final DocumentReference studentRef =
     FirebaseFirestore.instance.collection('students').doc(userToken);
 
-    // Delete the saved course
     await studentRef.collection('saved_courses').doc(documentId).delete();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Course $courseId removed from saved courses!')),
     );
 
-    // Refresh the courses list
     setState(() {
       _savedCoursesFuture = _fetchSavedCourses();
     });
@@ -68,68 +65,95 @@ class _SavedPageState extends State<SavedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Saved Courses'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _savedCoursesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          }
-
-          final savedCourses = snapshot.data;
-
-          if (savedCourses == null || savedCourses.isEmpty) {
-            return const Center(
-              child: Text(
-                'No saved courses found.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+            child: AppBar(
+              backgroundColor: const Color(0xFF0096AB),
+              centerTitle: true,
+              title: const Text(
+                'Saved Courses',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            );
-          }
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _savedCoursesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          return ListView.builder(
-            itemCount: savedCourses.length,
-            itemBuilder: (context, index) {
-              final course = savedCourses[index];
-              final courseName = course['course_name'] ?? 'Unknown Course';
-              final courseId = course['course_id'] ?? 'N/A';
-              final documentId = course['id']; // Document ID for deletion
-              final savedAt = course['saved_at']?.toDate().toString() ?? 'N/A';
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
 
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text(
-                    courseName,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text('Course ID: $courseId\nSaved At: $savedAt'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      _deleteSavedCourse(courseId, documentId);
-                    },
-                  ),
-                  onTap: () {
-                    // Handle card tap if needed
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Tapped on $courseName')),
+                final savedCourses = snapshot.data;
+
+                if (savedCourses == null || savedCourses.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No saved courses found.',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0096AB),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: savedCourses.length,
+                  itemBuilder: (context, index) {
+                    final course = savedCourses[index];
+                    final courseName = course['course_name'] ?? 'Unknown Course';
+                    final courseId = course['course_id'] ?? 'N/A';
+                    final documentId = course['id'];
+                    final savedAt =
+                        course['saved_at']?.toDate().toString() ?? 'N/A';
+
+                    return Card(
+                      margin: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        title: Text(
+                          courseName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0096AB),
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Course ID: $courseId\nSaved At: $savedAt',
+                          style: const TextStyle(color: Color(0xFFEFAC52)),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete,
+                              color: Color(0xFF0096AB)),
+                          onPressed: () {
+                            _deleteSavedCourse(courseId, documentId);
+                          },
+                        ),
+                      ),
                     );
                   },
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -57,26 +57,23 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF0096AB), // استخدام اللون الأول
         elevation: 1,
-        centerTitle: false,
+        centerTitle: true, // لتوسيط العنوان
         title: Text(
           'Hello, $studentName!',
           style: const TextStyle(
-            color: Color(0xFF0096AB),
+            color: Colors.white, // تغيير لون النص إلى الأبيض
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage('assets/profile.jpg'),
-            ),
+        shape: const ContinuousRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
           ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -179,7 +176,7 @@ class _HomePageState extends State<HomePage> {
             final courseId = courses[index].id;
 
             return FutureBuilder<double>(
-              future: _fetchAverageRating(courseId), // Call custom function to get the average rating
+              future: _fetchAverageRating(courseId),
               builder: (context, ratingSnapshot) {
                 if (ratingSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -285,7 +282,7 @@ class _HomePageState extends State<HomePage> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0096AB),
+                      color: Color(0xFF0096AB), // اللون الثاني
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -313,7 +310,7 @@ class _HomePageState extends State<HomePage> {
                     'Category: $category',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Color(0xFFEFAC52),
+                      color: Color(0xFFEFAC52), // اللون الأول
                     ),
                   ),
                   const SizedBox(height: 4),
