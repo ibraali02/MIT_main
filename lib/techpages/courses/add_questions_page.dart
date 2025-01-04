@@ -83,74 +83,151 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Questions')),
+      appBar: AppBar(
+        title: const Text(
+          'Add Questions',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _questionController,
-              decoration: const InputDecoration(labelText: 'Enter Question'),
-            ),
-            DropdownButton<String>(
-              value: questionType,
-              onChanged: (String? newValue) {
-                setState(() {
-                  questionType = newValue!;
-                  options.clear();
-                  trueFalseAnswer = null;
-                });
-              },
-              items: ['Multiple Choice', 'True/False', 'Essay']
-                  .map<DropdownMenuItem<String>>((value) {
-                return DropdownMenuItem<String>(value: value, child: Text(value));
-              }).toList(),
-            ),
-            if (questionType == 'Multiple Choice') ...[
+        child: SingleChildScrollView( // تمكين التمرير إذا كان المحتوى طويل
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // حقل السؤال
               TextField(
-                controller: _optionController,
-                decoration: const InputDecoration(labelText: 'Enter Option'),
-              ),
-              ElevatedButton(onPressed: _addOption, child: const Text('Add Option')),
-              ...options.map((option) {
-                return ListTile(
-                  title: Text(option['text']),
-                  leading: Checkbox(
-                    value: option['isCorrect'],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        option['isCorrect'] = value!;
-                      });
-                    },
+                controller: _questionController,
+                decoration: InputDecoration(
+                  labelText: 'Enter Question',
+                  labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              }).toList(),
-            ],
-            if (questionType == 'True/False') ...[
-              RadioListTile<String>(
-                title: const Text('True'),
-                value: 'True',
-                groupValue: trueFalseAnswer,
-                onChanged: (String? value) {
+                  filled: true,
+                  fillColor: const Color(0xFFF1F1F1),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Dropdown لاختيار نوع السؤال
+              DropdownButton<String>(
+                value: questionType,
+                onChanged: (String? newValue) {
                   setState(() {
-                    trueFalseAnswer = value;
+                    questionType = newValue!;
+                    options.clear();
+                    trueFalseAnswer = null;
                   });
                 },
+                items: ['Multiple Choice', 'True/False', 'Essay']
+                    .map<DropdownMenuItem<String>>((value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
               ),
-              RadioListTile<String>(
-                title: const Text('False'),
-                value: 'False',
-                groupValue: trueFalseAnswer,
-                onChanged: (String? value) {
-                  setState(() {
-                    trueFalseAnswer = value;
-                  });
-                },
+              const SizedBox(height: 20),
+
+              // أسئلة متعددة الخيارات
+              if (questionType == 'Multiple Choice') ...[
+                TextField(
+                  controller: _optionController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter Option',
+                    labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF1F1F1),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _addOption,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0096AB),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 10, // إضافة تأثير الظل
+                    shadowColor: Colors.black.withOpacity(0.4), // تأثير الظل
+                  ),
+                  child: const Text(
+                    'Add Option',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ...options.map((option) {
+                  return ListTile(
+                    title: Text(option['text']),
+                    leading: Checkbox(
+                      value: option['isCorrect'],
+                      onChanged: (bool? value) {
+                        setState(() {
+                          option['isCorrect'] = value!;
+                        });
+                      },
+                    ),
+                  );
+                }).toList(),
+              ],
+
+              // أسئلة صح/خطأ
+              if (questionType == 'True/False') ...[
+                RadioListTile<String>(
+                  title: const Text('True'),
+                  value: 'True',
+                  groupValue: trueFalseAnswer,
+                  onChanged: (String? value) {
+                    setState(() {
+                      trueFalseAnswer = value;
+                    });
+                  },
+                ),
+                RadioListTile<String>(
+                  title: const Text('False'),
+                  value: 'False',
+                  groupValue: trueFalseAnswer,
+                  onChanged: (String? value) {
+                    setState(() {
+                      trueFalseAnswer = value;
+                    });
+                  },
+                ),
+              ],
+
+              // زر حفظ السؤال
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: isSaving ? null : _saveQuestion,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0096AB),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 10, // إضافة تأثير الظل
+                  shadowColor: Colors.black.withOpacity(0.4), // تأثير الظل
+                ),
+                child: isSaving
+                    ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+                    : const Text(
+                  'Save Question',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
               ),
             ],
-            ElevatedButton(onPressed: _saveQuestion, child: const Text('Save Question')),
-          ],
+          ),
         ),
       ),
     );

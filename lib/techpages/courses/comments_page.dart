@@ -55,10 +55,7 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Comments'),
-        backgroundColor: Colors.green,
-      ),
+
       body: Column(
         children: [
           Expanded(
@@ -97,12 +94,26 @@ class _CommentsPageState extends State<CommentsPage> {
                     ).toString()
                         : 'Unknown time';
 
-                    return ListTile(
-                      title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(commentText),
-                      trailing: Text(
-                        formattedTime.split('.')[0], // Displays formatted time without milliseconds.
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        title: Text(
+                          userName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0096AB), // Dark Green
+                          ),
+                        ),
+                        subtitle: Text(commentText),
+                        trailing: Text(
+                          formattedTime.split('.')[0], // Displays formatted time without milliseconds.
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
                       ),
                     );
                   },
@@ -119,16 +130,32 @@ class _CommentsPageState extends State<CommentsPage> {
                     controller: _commentController,
                     decoration: InputDecoration(
                       hintText: 'Enter your comment...',
+                      filled: true,
+                      fillColor: Colors.grey[200], // Light background color for the text field
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _addComment,
-                  child: const Text('Add'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0096AB), // Dark Green
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),

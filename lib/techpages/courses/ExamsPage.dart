@@ -16,7 +16,7 @@ class _ExamsPageState extends State<ExamsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Exams')),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -43,9 +43,26 @@ class _ExamsPageState extends State<ExamsPage> {
 
               return Card(
                 margin: const EdgeInsets.all(8),
+                color: const Color(0xFFEFAC52), // اللون الذهبي
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
                 child: ListTile(
-                  title: Text(examName),
-                  subtitle: Text('Duration: $examDuration minutes'),
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Text(
+                    examName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Duration: $examDuration minutes',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                    ),
+                  ),
                   onTap: () {
                     // عند الضغط على الامتحان، انتقل إلى صفحة التفاصيل
                     Navigator.push(
@@ -74,7 +91,11 @@ class _ExamsPageState extends State<ExamsPage> {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }

@@ -154,20 +154,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1C9AAA),
-        title: const Text('Teacher Login', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-      ),
+
       body: Container(
         color: Colors.white,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(5),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: [              const SizedBox(height: 40),
+
+              // الشعار تحت الـ AppBar مباشرة
+              const Image(
+                image: AssetImage('lib/images/mit.png'), // ضع مسار الشعار هنا
+                height: 300, // تحديد ارتفاع الشعار
+              ),
+              const SizedBox(height: 20), // المسافة بين الشعار والنص
               const Text(
-                'Welcome Back!',
+                'Welcome Back Teacher',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,

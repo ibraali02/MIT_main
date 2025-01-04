@@ -19,8 +19,16 @@ class _VideosPageState extends State<VideosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // إزالة سهم الرجوع
-        title: const Text('Videos'),
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Videos',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // تغيير اللون إلى الأسود
+          ),
+        ),
+        backgroundColor: Colors.white, // اللون الأبيض
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -32,8 +40,10 @@ class _VideosPageState extends State<VideosPage> {
                 ),
               );
             },
+            color: const Color(0xFF0096AB), // الأزرق الفاتح
           ),
         ],
+        elevation: 0.0, // إزالة الظل
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -59,32 +69,80 @@ class _VideosPageState extends State<VideosPage> {
               final videoName = video['videoName'];
               final description = video['description'];
               final fileUrl = video['fileUrl'];
+              final videoId = video.id; // الحصول على ID الفيديو
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 5,
+                color: const Color(0xFFF2F2F2), // لون الخلفية الرمادي الفاتح
                 child: ListTile(
-                  title: Text(videoName),
-                  subtitle: Text(description),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.play_circle_fill),
-                    onPressed: () async {
-                      if (fileUrl.isNotEmpty) {
-                        try {
-                          await launchUrl(
-                            Uri.parse(fileUrl),
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not open video: $e')),
-                          );
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Invalid file URL')),
-                        );
-                      }
-                    },
+                  title: Text(
+                    videoName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0096AB), // اللون الأزرق الفاتح
+                    ),
+                  ),
+                  subtitle: Text(
+                    description,
+                    style: const TextStyle(
+                      color: Color(0xFF4F4F4F), // لون النص الرمادي
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.play_circle_fill),
+                        color: const Color(0xFF0096AB), // الأزرق الفاتح
+                        onPressed: () async {
+                          if (fileUrl.isNotEmpty) {
+                            try {
+                              await launchUrl(
+                                Uri.parse(fileUrl),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Could not open video: $e')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Invalid file URL')),
+                            );
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        color: Colors.red, // اللون الأحمر لحذف الفيديو
+                        onPressed: () async {
+                          try {
+                            // حذف الفيديو من Firebase و Supabase
+                            await FirebaseFirestore.instance
+                                .collection('courses')
+                                .doc(widget.courseId)
+                                .collection('videos')
+                                .doc(videoId)
+                                .delete();
+
+                            // يمكنك حذف الفيديو من Supabase هنا إذا كنت ترغب في ذلك
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Video deleted successfully')),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error deleting video: $e')),
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -95,6 +153,7 @@ class _VideosPageState extends State<VideosPage> {
     );
   }
 }
+
 class UploadVideoPage extends StatefulWidget {
   final String courseId;
 
@@ -194,7 +253,16 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Upload Video'),
+        title: const Text(
+          'Upload Video',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // تغيير اللون إلى الأسود
+          ),
+        ),
+        backgroundColor: Colors.white, // اللون الأبيض
+        elevation: 0.0, // إزالة الظل
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -203,27 +271,52 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
           children: [
             TextField(
               controller: videoNameController,
-              decoration: const InputDecoration(labelText: 'Video Name'),
+              decoration: const InputDecoration(
+                labelText: 'Video Name',
+                labelStyle: TextStyle(
+                  color: Color(0xFF0096AB), // الأزرق الفاتح
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0096AB)), // الأزرق الفاتح
+                ),
+              ),
             ),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                labelStyle: TextStyle(
+                  color: Color(0xFF0096AB), // الأزرق الفاتح
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF0096AB)), // الأزرق الفاتح
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             _selectedFile != null
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Selected File: ${_selectedFile!.files.first.name}'),
+                Text('Selected File: ${_selectedFile!.files.first.name}',
+                    style: TextStyle(
+                      color: const Color(0xFF0096AB), // الأزرق الفاتح
+                    )),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _uploadVideo(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+                  ),
                   child: const Text('Save Video'),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+              ),
               child: const Text('Pick a Video file'),
             ),
           ],

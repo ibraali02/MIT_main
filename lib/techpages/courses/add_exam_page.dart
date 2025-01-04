@@ -81,27 +81,78 @@ class _AddExamPageState extends State<AddExamPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Exam')),
+      appBar: AppBar(
+        title: const Text('Add Exam',  style: TextStyle(
+          fontSize: 24, // تحديد حجم الخط
+          fontWeight: FontWeight.bold, // جعل الخط عريض
+          color: Colors.white, // تحديد اللون الأبيض للنص
+
+        ),),
+        backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+        iconTheme: const IconThemeData(
+          color: Colors.white, // تحديد اللون الأبيض لزر الرجوع
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // اسم الامتحان
             TextField(
               controller: _examController,
-              decoration: const InputDecoration(labelText: 'Exam Name'),
+              decoration: InputDecoration(
+                labelText: 'Exam Name',
+                labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFF1F1F1),
+              ),
             ),
+            const SizedBox(height: 20),
+
+            // مدة الامتحان
             TextField(
               controller: _durationController,
-              decoration: const InputDecoration(labelText: 'Exam Duration (minutes)'),
+              decoration: InputDecoration(
+                labelText: 'Exam Duration (minutes)',
+                labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFF1F1F1),
+              ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 30),
+
+            // زر حفظ الامتحان مع تكبير وتحسين الشكل
             ElevatedButton(
               onPressed: isSaving ? null : _saveExam,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                elevation: 5, // إضافة الظل
+              ),
               child: isSaving
-                  ? const CircularProgressIndicator()
-                  : const Text('Save Exam'),
+                  ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              )
+                  : const Text(
+                'Save Exam',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // لون الخط الأبيض
+                ),
+              ),
             ),
           ],
         ),

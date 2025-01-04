@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddCoursePage extends StatefulWidget {
   const AddCoursePage({super.key});
@@ -14,13 +15,25 @@ class AddCoursePage extends StatefulWidget {
 class _AddCoursePageState extends State<AddCoursePage> {
   final _courseTitleController = TextEditingController();
   final _courseDetailsController = TextEditingController();
-  final _courseCategoryController = TextEditingController();
-  final _courseStartDateController = TextEditingController();
   final _teacherNameController = TextEditingController();
   XFile? _selectedImage;
   bool _loading = false;
+  String _selectedCategory = 'Technology';  // default category
 
-  // Function to upload image to Supabase Storage (No authentication check)
+  // List of categories for the DropdownButton
+  final List<String> categories = [
+    'All',
+    'Technology',
+    'Information Technology',
+    'Programming Languages',
+    'Cybersecurity',
+    'Data Science',
+    'Web Development',
+    'Mobile Development',
+    'Artificial Intelligence',
+  ];
+
+  // Function to upload image to Supabase Storage
   Future<String?> uploadImageToSupabase(XFile? image) async {
     if (image == null) {
       print('Error: Image is null.');
@@ -31,32 +44,22 @@ class _AddCoursePageState extends State<AddCoursePage> {
       final imageBytes = await image.readAsBytes();
       final storagePath = 'courses/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // Log MIME type and image size for debugging
-      print('MIME type: ${image.mimeType}');
-      print('Image size: ${imageBytes.lengthInBytes} bytes');
-      print('File path: ${image.path}');
-
-      // Check the file extension to determine if it's a valid image
       final fileExtension = image.path.split('.').last.toLowerCase();
       final allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
-      // Check if the file is an image by both MIME type and extension
       if (!allowedExtensions.contains(fileExtension) ||
           (image.mimeType != null && !image.mimeType!.startsWith('image'))) {
-        print('Error: The selected file is not an image. Extension: $fileExtension, MIME: ${image.mimeType}');
+        print('Error: The selected file is not an image.');
         return null;
       }
 
-      // Upload the image to Supabase Storage (without authentication check)
       final response = await Supabase.instance.client.storage.from('images').uploadBinary(
         storagePath,
         imageBytes,
         fileOptions: FileOptions(contentType: 'image/$fileExtension', upsert: true),
       );
 
-      // Retrieve the public URL of the uploaded image
       final publicUrl = Supabase.instance.client.storage.from('images').getPublicUrl(storagePath);
-      print('Image uploaded successfully: $publicUrl');
       return publicUrl;
     } catch (e) {
       print('Error uploading image: $e');
@@ -70,11 +73,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
     final title = _courseTitleController.text.trim();
     final details = _courseDetailsController.text.trim();
-    final category = _courseCategoryController.text.trim();
-    final startDate = _courseStartDateController.text.trim();
+    final category = _selectedCategory;
     final teacher = _teacherNameController.text.trim();
 
-    if (title.isEmpty || details.isEmpty || category.isEmpty || startDate.isEmpty || teacher.isEmpty || _selectedImage == null) {
+    if (title.isEmpty || details.isEmpty || teacher.isEmpty || _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields and select an image.')),
       );
@@ -86,6 +88,13 @@ class _AddCoursePageState extends State<AddCoursePage> {
     });
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null || token.isEmpty) {
+        throw Exception('User token not found. Please log in again.');
+      }
+
       final imageUrl = await uploadImageToSupabase(_selectedImage);
 
       if (imageUrl == null) {
@@ -96,10 +105,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
         'title': title,
         'details': details,
         'category': category,
-        'start_date': startDate,
         'teacher': teacher,
         'image_url': imageUrl,
         'created_at': Timestamp.now(),
+        'token': token,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +151,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Course')),
+      appBar: AppBar(
+        title: const Text('Add Course'),
+        backgroundColor: const Color(0xFF0096AB),
+        centerTitle: true,
+        foregroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -150,8 +164,52 @@ class _AddCoursePageState extends State<AddCoursePage> {
           children: [
             _buildTextField(controller: _courseTitleController, label: 'Course Title'),
             _buildTextField(controller: _courseDetailsController, label: 'Course Details'),
-            _buildTextField(controller: _courseCategoryController, label: 'Category'),
-            _buildTextField(controller: _courseStartDateController, label: 'Start Date (YYYY-MM-DD)'),
+            // Dropdown menu for category selection
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blueAccent, Colors.lightBlue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedCategory,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedCategory = newValue!;
+                    });
+                  },
+                  items: categories.map<DropdownMenuItem<String>>((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  dropdownColor: Colors.blueAccent,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
             _buildTextField(controller: _teacherNameController, label: 'Teacher Name'),
             const SizedBox(height: 10),
             Row(
@@ -160,16 +218,35 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   Image.file(File(_selectedImage!.path), height: 100),
                 ElevatedButton(
                   onPressed: _pickImage,
-                  child: const Text('Select Image'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFAC52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Select Image', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _addCourse,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0096AB),
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               child: _loading
-                  ? const CircularProgressIndicator()
-                  : const Text('Add Course'),
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                'Add Course',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -188,7 +265,25 @@ class _AddCoursePageState extends State<AddCoursePage> {
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
+          labelStyle: TextStyle(
+            color: Colors.black.withOpacity(0.7),
+            fontWeight: FontWeight.w600, // Bold label text
+          ),
+          filled: true,
+          fillColor: Colors.blueGrey[50], // Light background color
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16), // Rounded corners
+            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 2),
+          ),
         ),
       ),
     );

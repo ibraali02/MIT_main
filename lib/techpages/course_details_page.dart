@@ -11,7 +11,6 @@ class CourseDetailsPage extends StatefulWidget {
   final String imageUrl;
   final String details;
   final String teacher;
-  final String startDate;
 
   const CourseDetailsPage({
     super.key,
@@ -20,7 +19,6 @@ class CourseDetailsPage extends StatefulWidget {
     required this.imageUrl,
     required this.details,
     required this.teacher,
-    required this.startDate,
   });
 
   @override
@@ -47,17 +45,27 @@ class _CourseDetailsPageState extends State<CourseDetailsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.courseName),
-        backgroundColor: Colors.green,
+        title: Text(
+          widget.courseName,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF0096AB),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Details'),
-            Tab(text: 'Comments'),
-            Tab(text: 'Lectures'),
-            Tab(text: 'Videos'),
-            Tab(text: 'Ratings'),
-            Tab(text: 'Exams'), // Added Exams tab
+          indicatorColor: Colors.orange, // Orange indicator when selected
+          labelColor: Colors.orange, // Orange color for selected tab
+          unselectedLabelColor: Colors.white, // White color for unselected tab
+          tabs: [
+            _buildTab(Icons.info),
+            _buildTab(Icons.comment),
+            _buildTab(Icons.video_library),
+            _buildTab(Icons.video_call),
+            _buildTab(Icons.star),
+            _buildTab(Icons.assignment), // Added Exams tab
           ],
         ),
       ),
@@ -70,7 +78,6 @@ class _CourseDetailsPageState extends State<CourseDetailsPage>
             imageUrl: widget.imageUrl,
             details: widget.details,
             teacher: widget.teacher,
-            startDate: widget.startDate,
           ),
           CommentsPage(courseId: widget.courseId),
           LecturesPage(courseId: widget.courseId),
@@ -81,6 +88,13 @@ class _CourseDetailsPageState extends State<CourseDetailsPage>
       ),
     );
   }
+
+  // Function to build a Tab with icon only
+  Tab _buildTab(IconData icon) {
+    return Tab(
+      icon: Icon(icon),
+    );
+  }
 }
 
 class CourseDetailsTab extends StatelessWidget {
@@ -89,7 +103,6 @@ class CourseDetailsTab extends StatelessWidget {
   final String imageUrl;
   final String details;
   final String teacher;
-  final String startDate;
 
   const CourseDetailsTab({
     super.key,
@@ -98,7 +111,6 @@ class CourseDetailsTab extends StatelessWidget {
     required this.imageUrl,
     required this.details,
     required this.teacher,
-    required this.startDate,
   });
 
   @override
@@ -108,44 +120,51 @@ class CourseDetailsTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            imageUrl,
-            width: double.infinity,
-            height: 200,
-            fit: BoxFit.cover,
+          // Course Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 250,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(height: 16),
+
+          // Course Title
           Text(
             courseName,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF0096AB),
             ),
           ),
           const SizedBox(height: 8),
+
+          // Teacher Name
           Text(
             'Teacher: $teacher',
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               color: Colors.grey,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Start Date: $startDate',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
+
           const SizedBox(height: 16),
+
+          // Course Details
           Text(
             details,
             style: const TextStyle(
               fontSize: 16,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 16),
+
+          // Course ID (Token)
           Text(
             'Course ID (Token): $courseId',
             style: const TextStyle(

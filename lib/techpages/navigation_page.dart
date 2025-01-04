@@ -45,8 +45,8 @@ class _NavigationPageState extends State<NavigationPage> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.grey[600],
+          selectedItemColor: const Color(0xFF0096AB),  // اللون الأزرق المخصص
+          unselectedItemColor: const Color(0xFFEFAC52),  // اللون الذهبي المخصص
           showUnselectedLabels: true,
           selectedFontSize: 14,
           unselectedFontSize: 12,

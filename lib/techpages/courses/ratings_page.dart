@@ -11,26 +11,36 @@ class RatingsPage extends StatefulWidget {
 }
 
 class _RatingsPageState extends State<RatingsPage> {
+  // دالة لعرض النجوم بناءً على التقييم
+  Widget _buildStars(double rating) {
+    List<Widget> stars = [];
+    for (int i = 1; i <= 5; i++) {
+      Icon icon;
+      if (i <= rating) {
+        icon = const Icon(
+          Icons.star,
+          color: Color(0xFF0096AB), // الأزرق الفاتح
+        );
+      } else if (i == rating + 0.5) {
+        icon = const Icon(
+          Icons.star_half,
+          color: Color(0xFF0096AB),
+        );
+      } else {
+        icon = const Icon(
+          Icons.star_border,
+          color: Color(0xFF0096AB),
+        );
+      }
+      stars.add(icon);
+    }
+    return Row(children: stars);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ratings'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      AddRatingPage(courseId: widget.courseId),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      // إزالة الـ AppBar هنا
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -62,151 +72,49 @@ class _RatingsPageState extends State<RatingsPage> {
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                color: const Color(0xFFF2F2F2), // لون الخلفية الرمادي الفاتح
                 child: ListTile(
-                  title: Text(username),
-                  subtitle: Text(
-                    'Content: $contentScore\nExplanation: $explanationScore\nMaterial: $materialScore\nOverall: $overallScore\n$comment',
+                  contentPadding: const EdgeInsets.all(16.0),
+                  title: Text(
+                    username,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0096AB), // الأزرق الفاتح
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // عرض النجوم لكل تقييم
+                      const Text('Content Score:'),
+                      _buildStars(contentScore),
+                      const SizedBox(height: 5),
+                      const Text('Explanation Score:'),
+                      _buildStars(explanationScore),
+                      const SizedBox(height: 5),
+                      const Text('Material Score:'),
+                      _buildStars(materialScore),
+                      const SizedBox(height: 5),
+                      const Text('Overall Score:'),
+                      _buildStars(overallScore),
+                      const SizedBox(height: 10),
+                      Text(
+                        comment,
+                        style: const TextStyle(
+                          color: Color(0xFF4F4F4F), // النص الرمادي
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
             },
           );
         },
-      ),
-    );
-  }
-}
-
-class AddRatingPage extends StatefulWidget {
-  final String courseId;
-
-  const AddRatingPage({super.key, required this.courseId});
-
-  @override
-  _AddRatingPageState createState() => _AddRatingPageState();
-}
-
-class _AddRatingPageState extends State<AddRatingPage> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController commentController = TextEditingController();
-
-  double contentScore = 3.0;
-  double explanationScore = 3.0;
-  double materialScore = 3.0;
-  double overallScore = 3.0;
-
-  Future<void> _saveRating(BuildContext context) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('courses')
-          .doc(widget.courseId)
-          .collection('ratings')
-          .add({
-        'username': usernameController.text,
-        'contentScore': contentScore,
-        'explanationScore': explanationScore,
-        'materialScore': materialScore,
-        'overallScore': overallScore,
-        'comment': commentController.text,
-        'createdAt': Timestamp.now(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rating submitted successfully')),
-      );
-
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving rating: $e')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Rating'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(labelText: 'Your Name'),
-            ),
-            const SizedBox(height: 20),
-            const Text('Content Score:'),
-            Slider(
-              value: contentScore,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              label: contentScore.toString(),
-              onChanged: (value) {
-                setState(() {
-                  contentScore = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            const Text('Explanation Score:'),
-            Slider(
-              value: explanationScore,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              label: explanationScore.toString(),
-              onChanged: (value) {
-                setState(() {
-                  explanationScore = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            const Text('Material Score:'),
-            Slider(
-              value: materialScore,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              label: materialScore.toString(),
-              onChanged: (value) {
-                setState(() {
-                  materialScore = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            const Text('Overall Score:'),
-            Slider(
-              value: overallScore,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              label: overallScore.toString(),
-              onChanged: (value) {
-                setState(() {
-                  overallScore = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: commentController,
-              decoration: const InputDecoration(labelText: 'Your Comment'),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _saveRating(context),
-              child: const Text('Submit Rating'),
-            ),
-          ],
-        ),
       ),
     );
   }

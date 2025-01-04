@@ -1,42 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'course_details_page.dart';
-import 'AddCoursePage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'AddCoursePage.dart'; // Ensure the AddCoursePage is correctly imported
+import 'course_details_page.dart'; // Ensure the CourseDetailsPage is correctly imported
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final List<String> categories = [
+    'All',
+    'Technology',
+    'Information Technology',
+    'Programming Languages',
+    'Cybersecurity',
+    'Data Science',
+    'Web Development',
+    'Mobile Development',
+    'Artificial Intelligence',
+  ];
+
+  String selectedCategory = 'All';
+  String studentName = "Loading...";
+  String? userToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStudentName();
+  }
+
+  // Function to fetch student name and token using the token stored in SharedPreferences
+  Future<void> _fetchStudentName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userToken = prefs.getString('token');
+
+    if (userToken != null) {
+      var studentDoc = await FirebaseFirestore.instance
+          .collection('users') // Assuming 'students' collection holds the student data
+          .doc(userToken)
+          .get();
+
+      if (studentDoc.exists) {
+        setState(() {
+          studentName = studentDoc['fullName'] ?? "Unknown"; // Assuming the field is 'fullName'
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Hola, Sayef!',
-          style: TextStyle(
-            color: Colors.black,
+        backgroundColor: const Color(0xFF0096AB),
+        elevation: 1,
+        centerTitle: true,
+        title: Text(
+          'Hello, Teacher',
+          style: const TextStyle(
+            color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
+        shape: const ContinuousRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.green, size: 30),
+            icon: const Icon(
+        Icons.add,
+        color: Colors.yellow, // تغيير اللون إلى الأصفر
+      ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AddCoursePage()),
+                MaterialPageRoute(
+                  builder: (context) => const AddCoursePage(),
+                ),
               );
             },
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage('assets/profile.jpg'),
-            ),
           ),
         ],
       ),
@@ -45,20 +97,53 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10),
-            Text(
-              'What do you wanna learn today?',
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 15),
-            _buildCoursesList(),
+            const SizedBox(height: 20),
+            _buildCategoryDropdown(),
+            const SizedBox(height: 20),
+            _buildCoursesGrid(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCoursesList() {
+  Widget _buildCategoryDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: DropdownButton<String>(
+        value: selectedCategory,
+        isExpanded: true,
+        underline: const SizedBox(),
+        items: categories.map((category) {
+          return DropdownMenuItem(
+            value: category,
+            child: Text(
+              category,
+              style: const TextStyle(fontSize: 16),
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            selectedCategory = value!;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildCoursesGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('courses').snapshots(),
       builder: (context, snapshot) {
@@ -70,22 +155,59 @@ class HomePage extends StatelessWidget {
           return const Center(child: Text('Error loading courses'));
         }
 
-        final courses = snapshot.data!.docs;
+        final courses = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final category = data['category'] ?? '';
+          if (selectedCategory == 'All') {
+            return true;
+          }
+          return category == selectedCategory;
+        }).toList();
 
-        return ListView.builder(
+        if (courses.isEmpty) {
+          return const Center(
+            child: Text(
+              'No courses found for this category.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          );
+        }
+
+        return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // Display two items per row
+            crossAxisSpacing: 16, // Space between columns
+            mainAxisSpacing: 16, // Space between rows
+            childAspectRatio: 0.7, // Aspect ratio for the course cards
+          ),
           itemCount: courses.length,
           itemBuilder: (context, index) {
             final course = courses[index].data() as Map<String, dynamic>;
-            return _buildCategoryItem(
-              context,
-              course['image_url'],
-              course['title'],
-              course['details'],
-              course['teacher'],
-              course['start_date'],
-              courses[index].id,  // Pass courseId here
+            final courseId = courses[index].id;
+
+            return FutureBuilder<double>( // Fetch course rating
+              future: _fetchAverageRating(courseId),
+              builder: (context, ratingSnapshot) {
+                if (ratingSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final avgRating = ratingSnapshot.data ?? 0.0;
+
+                return _buildCourseCard(
+                  context,
+                  course['image_url'],
+                  course['title'],
+                  course['details'],
+                  course['teacher'],
+                  courseId,
+                  course['category'],
+                  avgRating,
+                  course['token'] == userToken, // Check if the course is assigned to the logged-in user
+                );
+              },
             );
           },
         );
@@ -93,95 +215,189 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryItem(
+  Future<double> _fetchAverageRating(String courseId) async {
+    final ratingsSnapshot = await FirebaseFirestore.instance
+        .collection('courses')
+        .doc(courseId)
+        .collection('ratings')
+        .get();
+
+    double avgRating = 0.0;
+    int ratingCount = 0;
+
+    for (var doc in ratingsSnapshot.docs) {
+      final ratingData = doc.data() as Map<String, dynamic>;
+      final score = ratingData['overallScore'] ?? 0.0;
+      avgRating += score;
+      ratingCount++;
+    }
+
+    if (ratingCount > 0) {
+      avgRating = avgRating / ratingCount;
+    }
+
+    return avgRating;
+  }
+
+  Widget _buildCourseCard(
       BuildContext context,
       String imageUrl,
       String title,
       String details,
       String teacher,
-      String startDate,
-      String courseId,  // Added courseId parameter
+      String courseId,
+      String category,
+      double rating,
+      bool isUserCourse, // Indicator for whether this course belongs to the logged-in user
       ) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CourseDetailsPage(
-              courseId: courseId,  // Pass courseId to CourseDetailsPage
-              courseName: title,
-              imageUrl: imageUrl,
-              details: details,
-              teacher: teacher,
-              startDate: startDate,
+        if (isUserCourse) {
+          // Proceed to CourseDetailsPage only if the logged-in user is the owner of the course
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailsPage(
+                courseId: courseId,
+                courseName: title,
+                imageUrl: imageUrl,
+                details: details,
+                teacher: teacher,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          // Show a message if the user is not the course owner
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('You cannot view this course as you are not the owner.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       },
       child: Container(
-        width: double.infinity,
-        height: 180,
-        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Container(
-          alignment: Alignment.bottomLeft,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-              colors: [Colors.black54, Colors.transparent],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.network(
+                    imageUrl,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0096AB),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        details,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Teacher: $teacher',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Category: $category',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFEFAC52),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      rating > 0
+                          ? Row(
+                        children: [
+                          _buildRatingStars(rating),
+                          const SizedBox(width: 8),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      )
+                          : const Text(
+                        'No Rating Yet',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (isUserCourse)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 30,
                 ),
               ),
-              const SizedBox(height: 5),
-              Text(
-                details,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'Teacher: $teacher',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'Start Date: $startDate',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRatingStars(double rating) {
+    List<Widget> stars = [];
+    for (int i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.add(const Icon(Icons.star, color: Colors.amber, size: 16));
+      } else {
+        stars.add(const Icon(Icons.star_border, color: Colors.amber, size: 16));
+      }
+    }
+    return Row(
+      children: stars,
     );
   }
 }

@@ -15,14 +15,36 @@ class LecturesPage extends StatefulWidget {
 }
 
 class _LecturesPageState extends State<LecturesPage> {
+  Future<void> _deleteLecture(String lectureId) async {
+    try {
+      // حذف المحاضرة من Firestore
+      await FirebaseFirestore.instance
+          .collection('courses')
+          .doc(widget.courseId)
+          .collection('lectures')
+          .doc(lectureId)
+          .delete();
+
+      // يمكن إضافة حذف الملف من Supabase إذا كان ضروريًا
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lecture deleted successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting lecture: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        automaticallyImplyLeading: false, // حذف زر العودة
+        backgroundColor: Colors.white, // تغيير خلفية الـ AppBar إلى الأبيض
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Color(0xFF0096AB)), // تغيير لون زر الإضافة إلى الأزرق
             onPressed: () {
               Navigator.push(
                 context,
@@ -55,6 +77,7 @@ class _LecturesPageState extends State<LecturesPage> {
             itemCount: lectures.length,
             itemBuilder: (context, index) {
               final lecture = lectures[index];
+              final lectureId = lecture.id; // الحصول على معرف المحاضرة
               final lectureName = lecture['lectureName'];
               final description = lecture['description'];
               final professorName = lecture['professorName'];
@@ -62,29 +85,46 @@ class _LecturesPageState extends State<LecturesPage> {
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
+                color: Colors.white,
+                elevation: 5,
                 child: ListTile(
-                  title: Text(lectureName),
-                  subtitle: Text('Professor: $professorName\n$description'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.picture_as_pdf),
-                    onPressed: () async {
-                      if (fileUrl.isNotEmpty) {
-                        try {
-                          await launchUrl(
-                            Uri.parse(fileUrl),
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not open PDF file: $e')),
-                          );
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Invalid file URL')),
-                        );
-                      }
-                    },
+                  title: Text(
+                    lectureName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Professor: $professorName\n$description',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.picture_as_pdf, color: Color(0xFFEFAC52)),
+                        onPressed: () async {
+                          if (fileUrl.isNotEmpty) {
+                            try {
+                              await launchUrl(
+                                Uri.parse(fileUrl),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Could not open PDF file: $e')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Invalid file URL')),
+                            );
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteLecture(lectureId), // حذف المحاضرة عند الضغط
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -93,6 +133,7 @@ class _LecturesPageState extends State<LecturesPage> {
         },
       ),
     );
+
   }
 }
 
@@ -198,6 +239,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upload Lecture'),
+        backgroundColor: const Color(0xFF0096AB),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -206,15 +248,29 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
           children: [
             TextField(
               controller: lectureNameController,
-              decoration: const InputDecoration(labelText: 'Lecture Name'),
+              decoration: const InputDecoration(
+                labelText: 'Lecture Name',
+                labelStyle: TextStyle(color: Color(0xFF0096AB)),
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                labelStyle: TextStyle(color: Color(0xFF0096AB)),
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: professorNameController,
-              decoration: const InputDecoration(labelText: 'Professor Name'),
+              decoration: const InputDecoration(
+                labelText: 'Professor Name',
+                labelStyle: TextStyle(color: Color(0xFF0096AB)),
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 20),
             _selectedFile != null
@@ -226,12 +282,14 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
                 ElevatedButton(
                   onPressed: () => _uploadPdf(context),
                   child: const Text('Save Lecture'),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEFAC52)),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
               child: const Text('Pick a PDF file'),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEFAC52)),
             ),
           ],
         ),
