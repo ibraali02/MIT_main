@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../techpages/navigation_page.dart';
+import 'SignUpDialogPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,10 +25,11 @@ class _LoginPageState extends State<LoginPage> {
         // Normalize the username to lowercase for case-insensitive comparison
         String normalizedUsername = username.toLowerCase();
 
-        // Get user from Firestore based on the username
+        // Get user from Firestore based on the username and check if the user is accepted
         QuerySnapshot snapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('username', isEqualTo: normalizedUsername)
+            .collection('teacher_requests')
+            .where('email', isEqualTo: normalizedUsername)
+            .where('accepted', isEqualTo: true) // Only fetch accepted users
             .get();
 
         if (snapshot.docs.isNotEmpty) {
@@ -56,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User not found')),
+            const SnackBar(content: Text('User not found or not accepted')),
           );
         }
       } catch (e) {
@@ -72,160 +74,90 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showSignUpDialog() {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController phoneController = TextEditingController();
-    final TextEditingController degreeController = TextEditingController();
-    final TextEditingController collegeController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sign Up as a Teacher'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                TextField(
-                  controller: phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone'),
-                  keyboardType: TextInputType.phone,
-                ),
-                TextField(
-                  controller: degreeController,
-                  decoration: const InputDecoration(labelText: 'Degree'),
-                ),
-                TextField(
-                  controller: collegeController,
-                  decoration: const InputDecoration(labelText: 'College'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () async {
-                String name = nameController.text;
-                String phone = phoneController.text;
-                String degree = degreeController.text;
-                String college = collegeController.text;
-
-                if (name.isNotEmpty &&
-                    phone.isNotEmpty &&
-                    degree.isNotEmpty &&
-                    college.isNotEmpty) {
-                  try {
-                    await FirebaseFirestore.instance
-                        .collection('teacher_requests')
-                        .add({
-                      'name': name,
-                      'phone': phone,
-                      'degree': degree,
-                      'college': college,
-                    });
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request sent successfully!')),
-                    );
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Error sending request')),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
-                }
-              },
-              child: const Text('Send'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true, // Ensures that the screen adjusts when the keyboard appears
+      body: SingleChildScrollView( // Allows scrolling when the keyboard is visible
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
 
-      body: Container(
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: Column(
-            children: [              const SizedBox(height: 40),
-
-              // الشعار تحت الـ AppBar مباشرة
-              const Image(
-                image: AssetImage('lib/images/mit.png'), // ضع مسار الشعار هنا
-                height: 300, // تحديد ارتفاع الشعار
-              ),
-              const SizedBox(height: 20), // المسافة بين الشعار والنص
-              const Text(
-                'Welcome Back Teacher',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1C9AAA),
+                // الشعار تحت الـ AppBar مباشرة
+                const Image(
+                  image: AssetImage('lib/images/mit.png'), // ضع مسار الشعار هنا
+                  height: 300, // تحديد ارتفاع الشعار
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'If you don’t have an account as a teacher, press here.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              TextButton(
-                onPressed: _showSignUpDialog,
-                child: const Text(
-                  'Press Here',
-                  style: TextStyle(color: Color(0xFF1C9AAA)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 20), // المسافة بين الشعار والنص
+                const Text(
+                  'Welcome Back Teacher',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1C9AAA),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 10),
+                const Text(
+                  'If you don’t have an account as a teacher, press here.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to SignUpPage when the user presses "Press Here"
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignUpPage()),
+                    );
+                  },
+                  child: const Text(
+                    'Press Here',
+                    style: TextStyle(color: Color(0xFF1C9AAA)),
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1C9AAA),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: _login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1C9AAA),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

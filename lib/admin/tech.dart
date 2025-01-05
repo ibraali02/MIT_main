@@ -1,235 +1,109 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart'; // Ensure url_launcher is imported
 
-class MyPage extends StatefulWidget {
-  const MyPage({super.key});
+class UserListPage extends StatefulWidget {
+  const UserListPage({super.key});
 
   @override
-  _MyPageState createState() => _MyPageState();
+  _UserListPageState createState() => _UserListPageState();
 }
 
-class _MyPageState extends State<MyPage> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-  TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
+class _UserListPageState extends State<UserListPage> {
+  String filterType = 'all'; // 'all', 'accepted', 'pending'
 
-  String _selectedRole = 'Student'; // Default role
-
-  // Function to save data to Firestore
-  void _saveData() async {
-    String username = _usernameController.text;
-    String password = _passwordController.text;
-    String confirmPassword = _confirmPasswordController.text;
-    String email = _emailController.text;
-    String phone = _phoneController.text;
-    String fullName = _fullNameController.text;
-
-    if (username.isNotEmpty &&
-        password.isNotEmpty &&
-        confirmPassword.isNotEmpty &&
-        email.isNotEmpty &&
-        phone.isNotEmpty &&
-        fullName.isNotEmpty) {
-      if (password != confirmPassword) {
-        // Show error if passwords do not match
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Password and Confirm Password do not match')));
-        return;
-      }
-
-      try {
-        // Add data to Firestore
-        await FirebaseFirestore.instance.collection('users').add({
-          'username': username,
-          'password': password,
-          'email': email,
-          'phone': phone,
-          'full_name': fullName,
-          'role': _selectedRole,
-        });
-
-        // Clear the text fields
-        _usernameController.clear();
-        _passwordController.clear();
-        _confirmPasswordController.clear();
-        _emailController.clear();
-        _phoneController.clear();
-        _fullNameController.clear();
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Data saved successfully!')));
-      } catch (e) {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error saving data')));
-      }
-    } else {
-      // Show error if fields are empty
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill all fields')));
+  // Function to launch the PDF URL externally
+  Future<void> _launchPDF(String fileUrl) async {
+    try {
+      await launchUrl(
+        Uri.parse(fileUrl),
+        mode: LaunchMode.externalApplication, // Open in an external app
+      );
+    } catch (e) {
+      throw 'Could not open PDF file: $e';
     }
   }
 
-  // Function to navigate to the user list page
-  void _goToUserList() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UserListPage()),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Registration'),
-        backgroundColor: const Color(0xFF0096AB), // AppBar background color
-        centerTitle: true,
-        foregroundColor: Colors.white, // Title text color
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildTextField(
-                      controller: _fullNameController,
-                      label: 'Full Name',
-                      icon: Icons.person,
-                    ),
-                    _buildTextField(
-                      controller: _usernameController,
-                      label: 'Username',
-                      icon: Icons.account_circle,
-                    ),
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      icon: Icons.email,
-                    ),
-                    _buildTextField(
-                      controller: _phoneController,
-                      label: 'Phone Number',
-                      icon: Icons.phone,
-                    ),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      icon: Icons.lock,
-                      obscureText: true,
-                    ),
-                    _buildTextField(
-                      controller: _confirmPasswordController,
-                      label: 'Confirm Password',
-                      icon: Icons.lock_outline,
-                      obscureText: true,
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _selectedRole,
-                      items: const [
-                        DropdownMenuItem(
-                            value: 'Student', child: Text('Student')),
-                        DropdownMenuItem(
-                            value: 'Teacher', child: Text('Teacher')),
-                        DropdownMenuItem(value: 'Admin', child: Text('Admin')),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedRole = value!;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Role',
-                        prefixIcon: Icon(Icons.work_outline),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _saveData,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEFAC52), // Button color
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white, // Button text color
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _goToUserList,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0096AB), // Button color
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'View Users',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white, // Button text color
-                        ),
-                      ),
-                    ),
-                  ],
+  // Function to accept user and add a 'accepted' field
+  Future<void> _acceptUser(BuildContext context, Map<String, dynamic> userData) async {
+    try {
+      // Show dialog with email and password for copying
+      showDialog(
+        context: context,
+        barrierDismissible: true, // Allow closing the dialog by tapping outside
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("User Accepted"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Email: ${userData['email']}'),
+                Text('Password: ${userData['password']}'),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: userData['email']));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Email copied to clipboard')),
+                    );
+                  },
+                  child: const Text('Copy Email'),
                 ),
-              ),
+                ElevatedButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: userData['password']));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password copied to clipboard')),
+                    );
+                  },
+                  child: const Text('Copy Password'),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Update the 'teacher_requests' collection by adding an 'accepted' field
+      await FirebaseFirestore.instance.collection('teacher_requests').doc(userData['id']).update({
+        'accepted': true,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User accepted successfully. Email: ${userData['email']}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error accepting user: $e')),
+      );
+    }
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool obscureText = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 2), // Border color
-          ),
-        ),
-      ),
-    );
-  }
-}
+  // Function to reject user and set 'accepted' field to false
+  Future<void> _rejectUser(BuildContext context, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('teacher_requests').doc(userId).update({
+        'accepted': false,
+      });
 
-class UserListPage extends StatelessWidget {
-  const UserListPage({super.key});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User rejected successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error rejecting user: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -240,48 +114,169 @@ class UserListPage extends StatelessWidget {
         centerTitle: true,
         foregroundColor: Colors.white, // Title text color
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          var users = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              var user = users[index];
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: ListTile(
-                  title: Text(user['full_name']),
-                  subtitle: Text(user['email']),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          // Delete user
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(user.id)
-                              .delete();
-                        },
-                      ),
-                    ],
+      body: Column(
+        children: [
+          // Buttons to filter users
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Accept button
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      filterType = 'accepted';
+                    });
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.orange; // Orange color when pressed
+                      }
+                      return filterType == 'accepted' ? Colors.orange : Colors.blue;
+                    }),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 15, vertical: 10)),
+                    textStyle: MaterialStateProperty.all(TextStyle(fontSize: 14, color: Colors.white)), // White text
                   ),
+                  child: const Text('Accepted Users'),
                 ),
-              );
-            },
-          );
-        },
+                const SizedBox(width: 10),
+                // Pending button
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      filterType = 'pending';
+                    });
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.orange; // Orange color when pressed
+                      }
+                      return filterType == 'pending' ? Colors.orange : Colors.blue;
+                    }),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 15, vertical: 10)),
+                    textStyle: MaterialStateProperty.all(TextStyle(fontSize: 14, color: Colors.white)), // White text
+                  ),
+                  child: const Text('Pending Users'),
+                ),
+                const SizedBox(width: 10),
+                // All button
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      filterType = 'all';
+                    });
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.orange; // Orange color when pressed
+                      }
+                      return filterType == 'all' ? Colors.orange : Colors.blue;
+                    }),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 15, vertical: 10)),
+                    textStyle: MaterialStateProperty.all(TextStyle(fontSize: 14, color: Colors.white)), // White text
+                  ),
+                  child: const Text('All Requests'),
+                ),
+              ],
+            ),
+          ),
+          // StreamBuilder to display filtered users based on filterType
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('teacher_requests')
+                  .where('accepted', isEqualTo: filterType == 'all' ? null : filterType == 'accepted')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var users = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    var user = users[index];
+                    final fileUrl = user['cvUrl'] ?? ''; // Use empty string if cvUrl is missing
+                    bool isAccepted = user['accepted'] ?? false;
+
+                    return Card(
+                      margin: const EdgeInsets.all(8.0),
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        title: Text(user['fullName']),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Email: ${user['email']}'),
+                            Text('Password: ${user['password']}'),
+                            Text('Phone: ${user['phone']}'),
+                            Text('Degree: ${user['degree']}'),
+                          ],
+                        ),
+                        isThreeLine: true, // To allow for more space for data
+                        contentPadding: const EdgeInsets.all(16.0),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // PDF button
+                            IconButton(
+                              icon: const Icon(Icons.picture_as_pdf, color: Colors.orange), // Orange color
+                              onPressed: () async {
+                                if (fileUrl.isNotEmpty) {
+                                  try {
+                                    await _launchPDF(fileUrl);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Could not open PDF file: $e')),
+                                    );
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('No CV available')),
+                                  );
+                                }
+                              },
+                            ),
+                            // Only show Accept button if user is not accepted
+                            if (!isAccepted)
+                              IconButton(
+                                icon: const Icon(Icons.check, color: Colors.green), // Green color
+                                onPressed: () async {
+                                  var userData = {
+                                    'email': user['email'],
+                                    'full_name': user['fullName'],
+                                    'password': user['password'],
+                                    'phone': user['phone'],
+                                    'id': user.id, // Add user ID to the data
+                                  };
+                                  await _acceptUser(context, userData);
+                                },
+                              ),
+                            // Reject button
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.red), // Red color
+                              onPressed: () async {
+                                await _rejectUser(context, user.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

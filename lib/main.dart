@@ -6,6 +6,8 @@ import 'package:graduation/pages/signupstd.dart';
 import 'package:graduation/techpages/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'admin/tech.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -39,7 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue, // Define a primary color for the app
       ),
-      home: LoginPage(), // Set the home page to LoginPage
+      home: UserListPage(), // Set the home page to LoginPage
     );
   }
 }
