@@ -15,7 +15,7 @@ class CourseRegistrationPage extends StatelessWidget {
   Future<void> _saveCourse(BuildContext context) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? userToken = prefs.getString('user_token');
+      final String? userToken = prefs.getString('user_document_id');
 
       if (userToken == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +58,7 @@ class CourseRegistrationPage extends StatelessWidget {
   Future<void> _enrollCourse(BuildContext context) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? userToken = prefs.getString('user_token');
+      final String? userToken = prefs.getString('user_document_id');
 
       if (userToken == null) {
         ScaffoldMessenger.of(context).showSnackBar(
