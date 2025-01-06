@@ -72,7 +72,7 @@ class _SavedPageState extends State<SavedPage> {
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
             ),
-            child: AppBar(
+            child: AppBar( automaticallyImplyLeading: false,
               backgroundColor: const Color(0xFF0096AB),
               centerTitle: true,
               title: const Text(

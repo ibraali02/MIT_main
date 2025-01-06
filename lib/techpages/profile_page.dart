@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:graduation/techpages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -10,11 +11,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late TextEditingController _usernameController;
   late TextEditingController _passwordController;
   late TextEditingController _fullNameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
+  late TextEditingController _collegeController;
+  late TextEditingController _degreeController;
+
   bool _isPasswordVisible = false; // للتحكم في إظهار/إخفاء كلمة المرور
 
   Future<Map<String, dynamic>>? _userDataFuture;
@@ -22,21 +25,24 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _fullNameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
+    _collegeController = TextEditingController();
+    _degreeController = TextEditingController();
+
     _userDataFuture = _fetchUserProfile();
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _passwordController.dispose();
     _fullNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+    _collegeController.dispose();
+    _degreeController.dispose();
     super.dispose();
   }
 
@@ -49,8 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     final DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userToken)
+        .collection('teacher_requests')
+        .doc(userToken) // استخدام معرّف المستخدم لجلب بيانات الطلب
         .get();
 
     if (!userSnapshot.exists) {
@@ -59,67 +65,46 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final userData = userSnapshot.data();
 
-    _usernameController.text = userData?['username'] ?? 'Unknown';
-    _passwordController.text = userData?['password'] ?? '***';
-    _fullNameController.text = userData?['full_name'] ?? 'Unknown';
+    _fullNameController.text = userData?['fullName'] ?? 'Unknown';
     _emailController.text = userData?['email'] ?? 'No Email';
     _phoneController.text = userData?['phone'] ?? 'No Phone';
+    _collegeController.text = userData?['college'] ?? 'Unknown';
+    _degreeController.text = userData?['degree'] ?? 'Unknown';
 
-    return {
-      'full_name': userData?['full_name'] ?? 'Unknown',
-      'email': userData?['email'] ?? 'No Email',
-      'phone': userData?['phone'] ?? 'No Phone',
-      'username': userData?['username'] ?? 'unknown',
-      'password': userData?['password'] ?? '***',
-      'city': userData?['city'] ?? 'Unknown',
-      'gender': userData?['gender'] ?? 'Unknown',
-      'registrationNumber': userData?['registrationNumber'] ?? 'Unknown',
-    };
+    return userData ?? {};
   }
 
   void _saveChanges() {
     // منطق لحفظ التعديلات، مثل تحديث قاعدة البيانات أو SharedPreferences
-    // يمكن هنا تحديث البيانات في Firestore أو غيرها
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Changes saved successfully!')),
     );
   }
 
-  void _showContactUsDialog() {
+  Future<void> _logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');  // حذف التوكن المخزن
+    // فتح صفحة تسجيل الدخول
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginPage()), // تأكد من استبدال LoginPage باسم الصفحتك الفعلي
+          (Route<dynamic> route) => false, // حذف جميع الصفحات السابقة من المكدس
+    );
+  }
+
+  void _contactUs() {
+    // منطق فتح صفحة الاتصال، يمكن تنفيذ صفحة جديدة أو عرض معلومات الاتصال
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Contact Us'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'You can contact us at:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0096AB)),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Email: support@example.com',
-                style: TextStyle(fontSize: 16, color: Color(0xFF4F4F4F)),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Phone: +1 234 567 890',
-                style: TextStyle(fontSize: 16, color: Color(0xFF4F4F4F)),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Contact Us'),
+        content: const Text('For inquiries, please contact us at: support@example.com'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // إغلاق الحوار
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -166,10 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           if (userData == null) {
             return const Center(
-              child: Text(
-                'No user data found.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0096AB)),
-              ),
+              child: Text('No user data found.'),
             );
           }
 
@@ -208,21 +190,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 _buildProfileCard(
-                  icon: Icons.account_circle,
-                  title: 'Username',
-                  child: TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your username',
-                    ),
-                  ),
-                ),
-                _buildProfileCard(
                   icon: Icons.lock,
                   title: 'Password',
                   child: TextField(
                     controller: _passwordController,
-                    obscureText: !_isPasswordVisible, // إخفاء/إظهار كلمة المرور
+                    obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
                       suffixIcon: IconButton(
@@ -236,6 +208,26 @@ class _ProfilePageState extends State<ProfilePage> {
                           });
                         },
                       ),
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.school,
+                  title: 'College',
+                  child: TextField(
+                    controller: _collegeController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your college',
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.grade,
+                  title: 'Degree',
+                  child: TextField(
+                    controller: _degreeController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your degree',
                     ),
                   ),
                 ),
@@ -256,7 +248,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _showContactUsDialog, // عرض الـ Dialog عند الضغط على الزر
+                  onPressed: _contactUs,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0096AB),
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -266,6 +258,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: const Text(
                     'Contact Us',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -301,11 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: const Color(0xFF0096AB)),
                   ),
                   const SizedBox(height: 4),
-                  child ??
-                      const Text(
-                        'N/A',
-                        style: TextStyle(fontSize: 16, color: Color(0xFF4F4F4F)),
-                      ),
+                  child ?? const Text('N/A'),
                 ],
               ),
             ),

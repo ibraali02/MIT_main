@@ -6,6 +6,7 @@ import 'package:graduation/pages/signupstd.dart';
 import 'package:graduation/techpages/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'RoleSelectionPage.dart';
 import 'admin/tech.dart';
 
 void main() async {
@@ -36,12 +37,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp(    debugShowCheckedModeBanner: false, // إزالة خط التجربة
+
       title: 'Graduation App', // Set the app title
       theme: ThemeData(
         primarySwatch: Colors.blue, // Define a primary color for the app
       ),
-      home: UserListPage(), // Set the home page to LoginPage
+      home: RoleSelectionPage(), // Set the home page to LoginPage
     );
   }
 }

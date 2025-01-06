@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:graduation/pages/signupstd.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'courses/CompletedCoursesPage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -13,6 +13,13 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   Future<Map<String, dynamic>>? _userDataFuture;
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _registrationNumberController = TextEditingController();
+  String? _userDocumentId;
 
   @override
   void initState() {
@@ -28,6 +35,8 @@ class _ProfilePageState extends State<ProfilePage> {
       throw Exception("User token not found. Please log in again.");
     }
 
+    _userDocumentId = userToken;
+
     // Fetch user profile data
     final DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
         .collection('students')
@@ -40,15 +49,42 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final userData = userSnapshot.data();  // Directly get data from the snapshot
 
-    // Return the data with proper default values
-    return {
-      'fullName': userData?['fullName'] ?? 'Unknown',
-      'email': userData?['email'] ?? 'No Email',
-      'city': userData?['city'] ?? 'Unknown City',
-      'gender': userData?['gender'] ?? 'Unknown Gender',
-      'phone': userData?['phone'] ?? 'No Phone',
-      'registrationNumber': userData?['registrationNumber'] ?? 'N/A',
+    // Set the text controllers with fetched data
+    _fullNameController.text = userData?['fullName'] ?? '';
+    _emailController.text = userData?['email'] ?? '';
+    _cityController.text = userData?['city'] ?? '';
+    _genderController.text = userData?['gender'] ?? '';
+    _phoneController.text = userData?['phone'] ?? '';
+    _registrationNumberController.text = userData?['registrationNumber'] ?? '';
+
+    return userData!;
+  }
+
+  // Save profile changes
+  Future<void> _saveProfileChanges() async {
+    final updatedData = {
+      'fullName': _fullNameController.text,
+      'email': _emailController.text,
+      'city': _cityController.text,
+      'gender': _genderController.text,
+      'phone': _phoneController.text,
+      'registrationNumber': _registrationNumberController.text,
     };
+
+    await FirebaseFirestore.instance.collection('students').doc(_userDocumentId).update(updatedData);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile updated successfully!')),
+    );
+  }
+
+  // Log out the user
+  // Log out the user
+  Future<void> _logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_document_id'); // حذف التوكن
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) =>SignUpStd()), // استبدل LoginPage بصفحة تسجيل الدخول الخاصة بك
+    );
   }
 
   // Navigate to Completed Courses Page
@@ -63,8 +99,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
+
         preferredSize: const Size.fromHeight(70.0),
-        child: AppBar(
+        child: AppBar( automaticallyImplyLeading: false,
           backgroundColor: const Color(0xFF0096AB), // Color for AppBar
           elevation: 4.0,
           shape: const RoundedRectangleBorder(
@@ -113,48 +150,69 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.person,
                   title: 'Full Name',
-                  value: userData['fullName'],
+                  controller: _fullNameController,
+                  enabled: true, // Allow editing
                 ),
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.email,
                   title: 'Email',
-                  value: userData['email'],
+                  controller: _emailController,
+                  enabled: true, // Allow editing
                 ),
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.location_city,
                   title: 'City',
-                  value: userData['city'],
+                  controller: _cityController,
+                  enabled: true, // Allow editing
                 ),
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.transgender,
                   title: 'Gender',
-                  value: userData['gender'],
+                  controller: _genderController,
+                  enabled: true, // Allow editing
                 ),
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.phone,
                   title: 'Phone',
-                  value: userData['phone'],
+                  controller: _phoneController,
+                  enabled: true, // Allow editing
                 ),
-                _buildProfileCard(
+                _buildEditableCard(
                   icon: Icons.confirmation_number,
                   title: 'Registration Number',
-                  value: userData['registrationNumber'],
+                  controller: _registrationNumberController,
+                  enabled: true, // Allow editing
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _showContactDialog,
+                  onPressed: _saveProfileChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEFAC52), // Use the second color here for the button
+                    backgroundColor: Colors.blue, // Set button color to blue
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: const Text(
-                    'Contact Us',
+                    'Save Changes',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Set button color to red
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -181,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileCard({required IconData icon, required String title, required String value}) {
+  Widget _buildEditableCard({required IconData icon, required String title, required TextEditingController controller, bool enabled = false}) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 5,
@@ -196,64 +254,20 @@ class _ProfilePageState extends State<ProfilePage> {
             Icon(icon, size: 30, color: const Color(0xFF0096AB)), // Use the first color for icons
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: const Color(0xFF0096AB)),
+              child: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: title,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(fontSize: 16, color: Color(0xFF4F4F4F)),
-                  ),
-                ],
+                ),
+                enabled: enabled, // Allow editing if enabled
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _showContactDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Contact Us',
-            style: TextStyle(color: Color(0xFF0096AB)),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.phone, color: Color(0xFF0096AB)),
-                title: Text('Phone:', style: TextStyle(color: Color(0xFF0096AB))),
-                subtitle: Text('+1234567890', style: TextStyle(color: Color(0xFFEFAC52))),
-              ),
-              ListTile(
-                leading: Icon(Icons.email, color: Color(0xFF0096AB)),
-                title: Text('Email:', style: TextStyle(color: Color(0xFF0096AB))),
-                subtitle: Text('contact@domain.com', style: TextStyle(color: Color(0xFFEFAC52))),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Close',
-                style: TextStyle(color: Color(0xFF0096AB)),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

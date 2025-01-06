@@ -15,7 +15,7 @@ class _ExamsPageState extends State<ExamsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Exams')),
+      appBar: AppBar( automaticallyImplyLeading: false,title: const Text('Exams')),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')

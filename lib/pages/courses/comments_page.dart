@@ -25,7 +25,7 @@ class _CommentsPageState extends State<CommentsPage> {
     try {
       // Retrieve the user token from SharedPreferences.
       final prefs = await SharedPreferences.getInstance();
-      final userToken = prefs.getString('token');
+      final userToken = prefs.getString('user_document_id');
 
       if (userToken == null) {
         throw Exception('User token not found in SharedPreferences.');
@@ -33,14 +33,14 @@ class _CommentsPageState extends State<CommentsPage> {
 
       // Search for the document in the 'users' collection where the token matches the document ID.
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('students')
           .doc(userToken)
           .get();
 
       if (userDoc.exists) {
         // Extract the user name from the document.
         setState(() {
-          _userName = userDoc.data()?['username'] ?? 'Unknown User';
+          _userName = userDoc.data()?['fullName'] ?? 'Unknown User';
         });
       } else {
         throw Exception('User document not found.');

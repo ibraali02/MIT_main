@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'navigation_page.dart'; // Ensure this is the correct import for NavigationPage
+import 'navigation_page.dart';
 import 'student_data_entry.dart';
 
 class SignUpStd extends StatefulWidget {
@@ -16,10 +16,8 @@ class _SignUpStdState extends State<SignUpStd> {
   final TextEditingController passwordController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Function to handle user login
   void loginUser() async {
     try {
-      // Check if email and password are provided
       if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please fill in both fields')),
@@ -27,13 +25,11 @@ class _SignUpStdState extends State<SignUpStd> {
         return;
       }
 
-      // Fetch the user data from Firestore
       var userQuerySnapshot = await _firestore
-          .collection('students') // Assuming 'students' collection contains user data
+          .collection('students')
           .where('email', isEqualTo: emailController.text.trim())
           .get();
 
-      // Check if user exists
       if (userQuerySnapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No user found with this email.')),
@@ -41,10 +37,8 @@ class _SignUpStdState extends State<SignUpStd> {
         return;
       }
 
-      // Get the user data from Firestore
       var userData = userQuerySnapshot.docs.first.data();
 
-      // Verify the password
       if (userData['password'] != passwordController.text.trim()) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Incorrect password.')),
@@ -52,22 +46,18 @@ class _SignUpStdState extends State<SignUpStd> {
         return;
       }
 
-      // Store the user Document ID (UID) in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_document_id', userQuerySnapshot.docs.first.id); // Store Document ID as token
+      await prefs.setString('user_document_id', userQuerySnapshot.docs.first.id);
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login Successful')),
       );
 
-      // Navigate to the NavigationPage after successful login
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const NavigationPage()), // Navigate to NavigationPage
+        MaterialPageRoute(builder: (context) => const NavigationPage()),
       );
 
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -79,20 +69,19 @@ class _SignUpStdState extends State<SignUpStd> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          // Header
-          Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF1C9AAA),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30.0),
-                bottomRight: Radius.circular(30.0),
+          // Header with reduced AppBar size
+          PreferredSize(
+            preferredSize: Size.fromHeight(100), // Set the height of the AppBar
+            child: AppBar(
+              backgroundColor: const Color(0xFF1C9AAA),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
               ),
-            ),
-            height: MediaQuery.of(context).size.height * 0.25,
-            child: const Padding(
-              padding: EdgeInsets.only(left: 20.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
+              title: const Padding(
+                padding: EdgeInsets.only(left: 20.0),
                 child: Text(
                   'Login',
                   style: TextStyle(
@@ -104,11 +93,21 @@ class _SignUpStdState extends State<SignUpStd> {
               ),
             ),
           ),
+          // Logo below the AppBar
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: <Widget>[
+                  // Image at the top
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Image.asset(
+                      'lib/images/mit.png', // تأكد من أن هذا المسار صحيح
+                      height: 300, // ضبط الارتفاع المطلوب للشعار
+                    ),
+                  ),
                   // Email input field
                   TextField(
                     controller: emailController,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // استيراد SharedPreferences
 import 'first_up.dart';
 
 class StudentDataEntry extends StatefulWidget {
@@ -23,7 +24,6 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
 
   Future<void> _registerUser() async {
     try {
-      // Validate if fields are empty or passwords do not match
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Passwords do not match!')),
@@ -43,24 +43,26 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
         return;
       }
 
-      // Create a random registration number if not entered
       String registrationNumber = _registrationNumberController.text.isNotEmpty
           ? _registrationNumberController.text
           : 'REG${DateTime.now().millisecondsSinceEpoch}';
 
-      // Save user data to Firestore
-      await _firestore.collection('students').add({
+      // إضافة المستخدم إلى Firestore
+      DocumentReference docRef = await _firestore.collection('students').add({
         'fullName': _fullNameController.text.trim(),
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
         'registrationNumber': registrationNumber,
         'city': _selectedCity,
         'gender': _selectedGender,
-        'password': _passwordController.text.trim(), // Save the password as plain text (consider hashing it)
-        'createdAt': FieldValue.serverTimestamp(), // Adds timestamp for the creation time
+        'password': _passwordController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // Show success dialog
+      // حفظ documentId في SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_document_id', docRef.id);
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -82,7 +84,6 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
         },
       );
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -94,7 +95,8 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Student Data Entry'),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF0096AB),
+        foregroundColor: Colors.white,
       ),
       body: Container(
         color: Colors.white,
@@ -128,14 +130,14 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
               const SizedBox(height: 40),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: const Color(0xFFEFAC52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
                 ),
                 onPressed: _registerUser,
                 child: const Text(
-                  'Submit',
+                  'Create', // تغيير النص إلى "Create"
                   style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
               ),
@@ -147,45 +149,92 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
   }
 
   Widget _buildTextField(TextEditingController controller, String label) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: 'Enter $label',
+          hintStyle: const TextStyle(color: Colors.grey),
+          labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
       ),
     );
   }
 
   Widget _buildPasswordField(TextEditingController controller, String label) {
-    return TextField(
-      controller: controller,
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: true,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: 'Enter $label',
+          hintStyle: const TextStyle(color: Colors.grey),
+          labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         ),
       ),
     );
   }
 
   Widget _buildDropdownField(String label, List<String> items, ValueChanged<String?> onChanged) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      items: items.map((String item) {
-        return DropdownMenuItem<String>(
-          value: item,
-          child: Text(item),
-        );
-      }).toList(),
-      onChanged: onChanged,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: 'Select $label',
+          hintStyle: const TextStyle(color: Colors.grey),
+          labelStyle: const TextStyle(color: Color(0xFF0096AB)),
+          border: InputBorder.none,
+        ),
+        items: items.map((String item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(item),
+          );
+        }).toList(),
+        onChanged: onChanged,
+      ),
     );
   }
 }

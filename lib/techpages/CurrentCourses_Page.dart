@@ -72,13 +72,12 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
       ),
     );
   }
-
   Widget _buildCoursesList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('courses')
           .where('token', isEqualTo: userToken)
-          .where('completed', isEqualTo: false) // Only fetch non-completed courses
+          .where('isCompleted', isEqualTo: false) // فقط استرجاع الدورات غير المكتملة
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -129,7 +128,8 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
                   ElevatedButton(
                     onPressed: () => _markCourseAsCompleted(courses[index].id),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: const Color(0xFF0096AB), // Text color
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF0096AB), // لون النص
                     ),
                     child: const Text('انتهاء'),
                   ),
@@ -141,7 +141,6 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
       },
     );
   }
-
   // Function to mark the course as completed
   Future<void> _markCourseAsCompleted(String courseId) async {
     try {

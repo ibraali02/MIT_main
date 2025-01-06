@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: AppBar( automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF0096AB), // استخدام اللون الأول
         elevation: 1,
         centerTitle: true, // لتوسيط العنوان

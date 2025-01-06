@@ -109,6 +109,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
         'image_url': imageUrl,
         'created_at': Timestamp.now(),
         'token': token,
+        'isCompleted': false,  // إضافة هذا الحقل
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,7 +127,6 @@ class _AddCoursePageState extends State<AddCoursePage> {
       });
     }
   }
-
   // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final picker = ImagePicker();

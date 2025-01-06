@@ -33,14 +33,14 @@ class _CommentsPageState extends State<CommentsPage> {
 
       // Search for the document in the 'users' collection where the token matches the document ID.
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('teacher_requests')
           .doc(userToken)
           .get();
 
       if (userDoc.exists) {
         // Extract the user name from the document.
         setState(() {
-          _userName = userDoc.data()?['username'] ?? 'Unknown User';
+          _userName = userDoc.data()?['fullName'] ?? 'Unknown User';
         });
       } else {
         throw Exception('User document not found.');
@@ -86,7 +86,7 @@ class _CommentsPageState extends State<CommentsPage> {
                   itemBuilder: (context, index) {
                     final commentData = comments[index].data() as Map<String, dynamic>;
                     final commentText = commentData['comment'] ?? 'No comment text';
-                    final userName = commentData['user_name'] ?? 'Anonymous';
+                    final userName = commentData['fullName'] ?? 'Anonymous';
                     final timestamp = commentData['timestamp'] as Timestamp?;
                     final formattedTime = timestamp != null
                         ? DateTime.fromMillisecondsSinceEpoch(
@@ -184,7 +184,7 @@ class _CommentsPageState extends State<CommentsPage> {
     try {
       final commentData = {
         'comment': commentText,
-        'user_name': _userName,
+        'fullName': _userName,
         'timestamp': FieldValue.serverTimestamp(),
       };
 
