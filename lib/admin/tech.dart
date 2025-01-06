@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserListPage extends StatefulWidget {
   const UserListPage({super.key});
@@ -51,6 +52,17 @@ class _UserListPageState extends State<UserListPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('خطأ في حذف الطالب: $e')),
+      );
+    }
+  }
+
+  // Function to open PDF
+  Future<void> _openPDF(String url) async {
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل في فتح ملف PDF: $e')),
       );
     }
   }
@@ -211,6 +223,20 @@ class _UserListPageState extends State<UserListPage> {
                     await _rejectUser(context, user.id);
                   },
                 ),
+                if (filterType == 'pending') // Show PDF button for pending requests
+                  IconButton(
+                    icon: const Icon(Icons.picture_as_pdf, color: Colors.blue),
+                    onPressed: () async {
+                      String pdfUrl = user['cvUrl'] ?? ''; // Assume the PDF URL is stored in the 'pdfUrl' field
+                      if (pdfUrl.isNotEmpty) {
+                        await _openPDF(pdfUrl);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('رابط PDF غير موجود لهذا المستخدم')),
+                        );
+                      }
+                    },
+                  ),
               ],
             ),
           ),
