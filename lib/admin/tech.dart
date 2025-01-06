@@ -12,6 +12,36 @@ class UserListPage extends StatefulWidget {
 class _UserListPageState extends State<UserListPage> {
   String filterType = 'all';
 
+  Future<void> _acceptUser(BuildContext context, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('teacher_requests').doc(userId).update({
+        'accepted': true,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم قبول المستخدم بنجاح')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء قبول المستخدم: $e')),
+      );
+    }
+  }
+
+  Future<void> _rejectUser(BuildContext context, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('teacher_requests').doc(userId).update({
+        'accepted': false,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم رفض المستخدم بنجاح')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء رفض المستخدم: $e')),
+      );
+    }
+  }
+
   Future<void> _deleteStudent(BuildContext context, String studentId) async {
     try {
       await FirebaseFirestore.instance.collection('students').doc(studentId).delete();
@@ -171,14 +201,14 @@ class _UserListPageState extends State<UserListPage> {
                 if (!isAccepted)
                   IconButton(
                     icon: const Icon(Icons.check, color: Colors.green),
-                    onPressed: () {
-                      // Accept user logic here
+                    onPressed: () async {
+                      await _acceptUser(context, user.id);
                     },
                   ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.red),
-                  onPressed: () {
-                    // Reject user logic here
+                  onPressed: () async {
+                    await _rejectUser(context, user.id);
                   },
                 ),
               ],
