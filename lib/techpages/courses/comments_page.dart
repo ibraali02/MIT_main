@@ -86,7 +86,7 @@ class _CommentsPageState extends State<CommentsPage> {
                   itemBuilder: (context, index) {
                     final commentData = comments[index].data() as Map<String, dynamic>;
                     final commentText = commentData['comment'] ?? 'No comment text';
-                    final userName = commentData['fullName'] ?? 'Anonymous';
+                    final userName = commentData['user_name'] ?? 'Anonymous';
                     final timestamp = commentData['timestamp'] as Timestamp?;
                     final formattedTime = timestamp != null
                         ? DateTime.fromMillisecondsSinceEpoch(
@@ -184,7 +184,7 @@ class _CommentsPageState extends State<CommentsPage> {
     try {
       final commentData = {
         'comment': commentText,
-        'fullName': _userName,
+        'user_name': _userName,
         'timestamp': FieldValue.serverTimestamp(),
       };
 

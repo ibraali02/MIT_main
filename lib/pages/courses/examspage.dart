@@ -15,7 +15,10 @@ class _ExamsPageState extends State<ExamsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar( automaticallyImplyLeading: false,title: const Text('Exams')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('الامتحانات'),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -28,7 +31,7 @@ class _ExamsPageState extends State<ExamsPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No exams available.'));
+            return const Center(child: Text('لا توجد امتحانات متاحة.'));
           }
 
           var exams = snapshot.data!.docs;
@@ -40,7 +43,6 @@ class _ExamsPageState extends State<ExamsPage> {
               var examName = exam['name'];
               var examDuration = exam['duration'];
 
-              // استعلام للحصول على عدد الأسئلة من مجموعة "questions" داخل الامتحان
               return StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('courses')
@@ -59,8 +61,11 @@ class _ExamsPageState extends State<ExamsPage> {
                   return Card(
                     margin: const EdgeInsets.all(8.0),
                     child: ListTile(
-                      title: Text(examName),
-                      subtitle: Text('Duration: $examDuration minutes\nQuestions: $questionCount'),
+                      title: Text(examName, style: TextStyle(fontFamily: 'Cairo')),
+                      subtitle: Text(
+                        'المدة: $examDuration دقائق\nعدد الأسئلة: $questionCount',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       trailing: ElevatedButton(
                         onPressed: () {
                           Navigator.push(
@@ -73,7 +78,7 @@ class _ExamsPageState extends State<ExamsPage> {
                             ),
                           );
                         },
-                        child: const Text('Start Exam'),
+                        child: const Text('ابدأ الامتحان'),
                       ),
                     ),
                   );

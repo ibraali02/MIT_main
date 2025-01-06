@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'signupstd.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation/pages/signupstd.dart';
+import 'package:graduation/techpages/login_page.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+import '../techpages/login_page.dart';
+
+class LoginPagee extends StatelessWidget {
+  const LoginPagee({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +30,14 @@ class LoginPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.only(left: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.centerRight,
                       child: Text(
-                        'Welcome to\nEducora.',
-                        style: TextStyle(
+                        'MITمرحبًا بكم في',
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.cairo(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -41,13 +46,14 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Align(
-                    alignment: Alignment.centerLeft,
+                  Align(
+                    alignment: Alignment.centerRight,
                     child: Padding(
-                      padding: EdgeInsets.only(left: 20.0),
+                      padding: const EdgeInsets.only(right: 20.0),
                       child: Text(
-                        'LOG IN AS',
-                        style: TextStyle(
+                        'تسجيل الدخول كـ',
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.cairo(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -68,9 +74,13 @@ class LoginPage extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => const SignUpStd()),
                         );
                       },
-                      child: const Text(
-                        'STUDENT',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      child: Text(
+                        'طالب',
+                        style: GoogleFonts.cairo(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -83,11 +93,16 @@ class LoginPage extends StatelessWidget {
                         backgroundColor: Colors.orange,
                       ),
                       onPressed: () {
-                        // هنا يمكنك إضافة الأكواد الخاصة بتسجيل الدخول كمعلم
-                      },
-                      child: const Text(
-                        'TEACHER',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                        );                      },
+                      child: Text(
+                        'معلم',
+                        style: GoogleFonts.cairo(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UserListPage extends StatefulWidget {
   const UserListPage({super.key});
@@ -9,17 +10,17 @@ class UserListPage extends StatefulWidget {
 }
 
 class _UserListPageState extends State<UserListPage> {
-  String filterType = 'all'; // 'all', 'accepted', 'pending', 'students'
+  String filterType = 'all';
 
   Future<void> _deleteStudent(BuildContext context, String studentId) async {
     try {
       await FirebaseFirestore.instance.collection('students').doc(studentId).delete();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Student deleted successfully')),
+        const SnackBar(content: Text('تم حذف الطالب بنجاح')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting student: $e')),
+        SnackBar(content: Text('خطأ في حذف الطالب: $e')),
       );
     }
   }
@@ -28,7 +29,14 @@ class _UserListPageState extends State<UserListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User List'),
+        title: Text(
+          'قائمة المستخدمين',
+          style: GoogleFonts.cairo(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: const Color(0xFF0096AB),
         centerTitle: true,
         foregroundColor: Colors.white,
@@ -38,18 +46,18 @@ class _UserListPageState extends State<UserListPage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: SizedBox(
-              height: 70, // ارتفاع كافٍ للأزرار
+              height: 70,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 children: [
-                  _buildFilterButton('Accepted Users', 'accepted'),
+                  _buildFilterButton('المستخدمين المقبولين', 'accepted'),
                   const SizedBox(width: 10),
-                  _buildFilterButton('Pending Users', 'pending'),
+                  _buildFilterButton('المستخدمين المعلقين', 'pending'),
                   const SizedBox(width: 10),
-                  _buildFilterButton('All Requests', 'all'),
+                  _buildFilterButton('جميع الطلبات', 'all'),
                   const SizedBox(width: 10),
-                  _buildFilterButton('Students', 'students'),
+                  _buildFilterButton('الطلاب', 'students'),
                 ],
               ),
             ),
@@ -96,7 +104,10 @@ class _UserListPageState extends State<UserListPage> {
           backgroundColor: filterType == type ? const Color(0xFFEFAC52) : const Color(0xFF0096AB),
           padding: const EdgeInsets.symmetric(vertical: 15),
         ),
-        child: Text(label),
+        child: Text(
+          label,
+          style: GoogleFonts.cairo(),
+        ),
       ),
     );
   }
@@ -113,8 +124,14 @@ class _UserListPageState extends State<UserListPage> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: ListTile(
-            title: Text(student['fullName']),
-            subtitle: Text('Email: ${student['email']}'),
+            title: Text(
+              student['fullName'],
+              style: GoogleFonts.cairo(),
+            ),
+            subtitle: Text(
+              'البريد الإلكتروني: ${student['email']}',
+              style: GoogleFonts.cairo(),
+            ),
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
@@ -140,8 +157,14 @@ class _UserListPageState extends State<UserListPage> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: ListTile(
-            title: Text(user['fullName']),
-            subtitle: Text('Email: ${user['email']}'),
+            title: Text(
+              user['fullName'],
+              style: GoogleFonts.cairo(),
+            ),
+            subtitle: Text(
+              'البريد الإلكتروني: ${user['email']}',
+              style: GoogleFonts.cairo(),
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

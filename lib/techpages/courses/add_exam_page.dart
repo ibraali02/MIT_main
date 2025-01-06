@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'add_questions_page.dart'; // استيراد صفحة إضافة الأسئلة
+import 'package:google_fonts/google_fonts.dart';
 
 class AddExamPage extends StatefulWidget {
   final String courseId;
@@ -23,7 +24,7 @@ class _AddExamPageState extends State<AddExamPage> {
   void _saveExam() {
     if (_examController.text.isEmpty || _durationController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in exam details.')),
+        const SnackBar(content: Text('يرجى تعبئة تفاصيل الامتحان.')),
       );
       return;
     }
@@ -37,7 +38,7 @@ class _AddExamPageState extends State<AddExamPage> {
 
     if (examDuration == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid duration')),
+        const SnackBar(content: Text('المدة غير صالحة')),
       );
       setState(() {
         isSaving = false;
@@ -70,7 +71,7 @@ class _AddExamPageState extends State<AddExamPage> {
       );
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
+        SnackBar(content: Text('خطأ: $error')),
       );
       setState(() {
         isSaving = false;
@@ -82,12 +83,14 @@ class _AddExamPageState extends State<AddExamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Exam',  style: TextStyle(
-          fontSize: 24, // تحديد حجم الخط
-          fontWeight: FontWeight.bold, // جعل الخط عريض
-          color: Colors.white, // تحديد اللون الأبيض للنص
-
-        ),),
+        title: Text(
+          'إضافة امتحان',
+          style: GoogleFonts.cairo(
+            fontSize: 24, // تحديد حجم الخط
+            fontWeight: FontWeight.bold, // جعل الخط عريض
+            color: Colors.white, // تحديد اللون الأبيض للنص
+          ),
+        ),
         backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
         iconTheme: const IconThemeData(
           color: Colors.white, // تحديد اللون الأبيض لزر الرجوع
@@ -95,66 +98,69 @@ class _AddExamPageState extends State<AddExamPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // اسم الامتحان
-            TextField(
-              controller: _examController,
-              decoration: InputDecoration(
-                labelText: 'Exam Name',
-                labelStyle: const TextStyle(color: Color(0xFF0096AB)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+        child: Directionality(
+          textDirection: TextDirection.rtl, // تحديد الاتجاه من اليمين لليسار
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // اسم الامتحان
+              TextField(
+                controller: _examController,
+                decoration: InputDecoration(
+                  labelText: 'اسم الامتحان',
+                  labelStyle: GoogleFonts.cairo(color: Color(0xFF0096AB)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF1F1F1),
                 ),
-                filled: true,
-                fillColor: const Color(0xFFF1F1F1),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // مدة الامتحان
-            TextField(
-              controller: _durationController,
-              decoration: InputDecoration(
-                labelText: 'Exam Duration (minutes)',
-                labelStyle: const TextStyle(color: Color(0xFF0096AB)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              // مدة الامتحان
+              TextField(
+                controller: _durationController,
+                decoration: InputDecoration(
+                  labelText: 'مدة الامتحان (بالدقائق)',
+                  labelStyle: GoogleFonts.cairo(color: Color(0xFF0096AB)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF1F1F1),
                 ),
-                filled: true,
-                fillColor: const Color(0xFFF1F1F1),
+                keyboardType: TextInputType.number,
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-            // زر حفظ الامتحان مع تكبير وتحسين الشكل
-            ElevatedButton(
-              onPressed: isSaving ? null : _saveExam,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              // زر حفظ الامتحان مع تكبير وتحسين الشكل
+              ElevatedButton(
+                onPressed: isSaving ? null : _saveExam,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  textStyle: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold),
+                  elevation: 5, // إضافة الظل
                 ),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                elevation: 5, // إضافة الظل
-              ),
-              child: isSaving
-                  ? const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              )
-                  : const Text(
-                'Save Exam',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // لون الخط الأبيض
+                child: isSaving
+                    ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+                    : Text(
+                  'حفظ الامتحان',
+                  style: GoogleFonts.cairo(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // لون الخط الأبيض
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

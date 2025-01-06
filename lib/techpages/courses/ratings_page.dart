@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RatingsPage extends StatefulWidget {
   final String courseId;
@@ -40,7 +41,6 @@ class _RatingsPageState extends State<RatingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // إزالة الـ AppBar هنا
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -54,7 +54,7 @@ class _RatingsPageState extends State<RatingsPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No ratings available.'));
+            return const Center(child: Text('لا توجد تقييمات.'));
           }
 
           final ratings = snapshot.data!.docs;
@@ -68,7 +68,6 @@ class _RatingsPageState extends State<RatingsPage> {
               final explanationScore = rating['explanationScore'];
               final materialScore = rating['materialScore'];
               final overallScore = rating['overallScore'];
-              final comment = rating['comment'];
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
@@ -76,38 +75,55 @@ class _RatingsPageState extends State<RatingsPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                color: const Color(0xFFF2F2F2), // لون الخلفية الرمادي الفاتح
+                color: const Color(0xFFF2F2F2),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16.0),
                   title: Text(
                     username,
-                    style: const TextStyle(
+                    style: GoogleFonts.cairo(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0096AB), // الأزرق الفاتح
+                      color: const Color(0xFF0096AB),
                     ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // عرض النجوم لكل تقييم
-                      const Text('Content Score:'),
-                      _buildStars(contentScore),
-                      const SizedBox(height: 5),
-                      const Text('Explanation Score:'),
-                      _buildStars(explanationScore),
-                      const SizedBox(height: 5),
-                      const Text('Material Score:'),
-                      _buildStars(materialScore),
-                      const SizedBox(height: 5),
-                      const Text('Overall Score:'),
-                      _buildStars(overallScore),
-                      const SizedBox(height: 10),
                       Text(
-                        comment,
-                        style: const TextStyle(
-                          color: Color(0xFF4F4F4F), // النص الرمادي
+                        'تقييم المحتوى:',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
+                          color: const Color(0xFF4F4F4F),
                         ),
                       ),
+                      _buildStars(contentScore),
+                      const SizedBox(height: 5),
+                      Text(
+                        'تقييم الشرح:',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
+                          color: const Color(0xFF4F4F4F),
+                        ),
+                      ),
+                      _buildStars(explanationScore),
+                      const SizedBox(height: 5),
+                      Text(
+                        'تقييم المادة:',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
+                          color: const Color(0xFF4F4F4F),
+                        ),
+                      ),
+                      _buildStars(materialScore),
+                      const SizedBox(height: 5),
+                      Text(
+                        'التقييم العام:',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
+                          color: const Color(0xFF4F4F4F),
+                        ),
+                      ),
+                      _buildStars(overallScore),
                     ],
                   ),
                 ),

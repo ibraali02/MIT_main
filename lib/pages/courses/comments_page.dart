@@ -55,86 +55,109 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: Directionality(
+        textDirection: TextDirection.rtl, // Set RTL direction
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('courses')
+                    .doc(widget.courseId)
+                    .collection('comments')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('courses')
-                  .doc(widget.courseId)
-                  .collection('comments')
-                  .orderBy('timestamp', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('حدث خطأ أثناء تحميل التعليقات'));
+                  }
 
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading comments'));
-                }
+                  final comments = snapshot.data!.docs;
 
-                final comments = snapshot.data!.docs;
+                  if (comments.isEmpty) {
+                    return const Center(child: Text('لا توجد تعليقات بعد.'));
+                  }
 
-                if (comments.isEmpty) {
-                  return const Center(child: Text('No comments yet.'));
-                }
+                  return ListView.builder(
+                    itemCount: comments.length,
+                    itemBuilder: (context, index) {
+                      final commentData = comments[index].data() as Map<String, dynamic>;
+                      final commentText = commentData['comment'] ?? 'لا توجد نصوص للتعليق';
+                      final userName = commentData['user_name'] ?? 'مستخدم مجهول';
+                      final timestamp = commentData['timestamp'] as Timestamp?;
+                      final formattedTime = timestamp != null
+                          ? DateTime.fromMillisecondsSinceEpoch(
+                        timestamp.millisecondsSinceEpoch,
+                      ).toString()
+                          : 'وقت غير معروف';
 
-                return ListView.builder(
-                  itemCount: comments.length,
-                  itemBuilder: (context, index) {
-                    final commentData = comments[index].data() as Map<String, dynamic>;
-                    final commentText = commentData['comment'] ?? 'No comment text';
-                    final userName = commentData['user_name'] ?? 'Anonymous';
-                    final timestamp = commentData['timestamp'] as Timestamp?;
-                    final formattedTime = timestamp != null
-                        ? DateTime.fromMillisecondsSinceEpoch(
-                      timestamp.millisecondsSinceEpoch,
-                    ).toString()
-                        : 'Unknown time';
-
-                    return ListTile(
-                      title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0096AB))), // Text color for user name
-                      subtitle: Text(commentText, style: const TextStyle(color: Color(0xFF0096AB))), // Text color for comment text
-                      trailing: Text(
-                        formattedTime.split('.')[0], // Displays formatted time without milliseconds.
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    );
-                  },
-                );
-              },
+                      return ListTile(
+                        title: Text(
+                          userName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0096AB),
+                            fontFamily: 'Cairo', // Use Cairo font
+                          ),
+                        ),
+                        subtitle: Text(
+                          commentText,
+                          style: const TextStyle(
+                            color: Color(0xFF0096AB),
+                            fontFamily: 'Cairo', // Use Cairo font
+                          ),
+                        ),
+                        trailing: Text(
+                          formattedTime.split('.')[0], // Displays formatted time without milliseconds.
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontFamily: 'Cairo', // Use Cairo font
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your comment...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: 'أدخل تعليقك...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        hintStyle: const TextStyle(color: Color(0xFF0096AB), fontFamily: 'Cairo'), // Hint text color and font
                       ),
-                      hintStyle: TextStyle(color: Color(0xFF0096AB)), // Hint text color
+                      style: const TextStyle(fontFamily: 'Cairo'), // Use Cairo font for input text
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _addComment,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(const Color(0xFFEFAC52)), // Button color
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _addComment,
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(const Color(0xFFEFAC52)), // Button color
+                    ),
+                    child: const Text(
+                      'إضافة',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Cairo'), // Text color and font
+                    ),
                   ),
-                  child: const Text('Add', style: TextStyle(color: Colors.white)), // Text color
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -143,14 +166,14 @@ class _CommentsPageState extends State<CommentsPage> {
     final commentText = _commentController.text.trim();
     if (commentText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment cannot be empty.')),
+        const SnackBar(content: Text('التعليق لا يمكن أن يكون فارغًا.')),
       );
       return;
     }
 
     if (_userName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch user name.')),
+        const SnackBar(content: Text('فشل في جلب اسم المستخدم.')),
       );
       return;
     }
@@ -171,11 +194,11 @@ class _CommentsPageState extends State<CommentsPage> {
       _commentController.clear();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment added successfully.')),
+        const SnackBar(content: Text('تم إضافة التعليق بنجاح.')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add comment: $e')),
+        SnackBar(content: Text('فشل في إضافة التعليق: $e')),
       );
     }
   }

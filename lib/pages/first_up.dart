@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // للتعامل مع Firestore
 import 'learning_reminders_page.dart'; // تأكد من صحة المسار
 
 class FirstUpPage extends StatefulWidget {
@@ -9,7 +12,38 @@ class FirstUpPage extends StatefulWidget {
 }
 
 class _FirstUpPageState extends State<FirstUpPage> {
-  String selectedAge = '';
+  String selectedClass = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // جلب الـ user_document_id عند بدء الصفحة
+    _getUserDocumentId();
+  }
+
+  Future<void> _getUserDocumentId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDocumentId = prefs.getString('user_document_id');
+    if (userDocumentId != null) {
+      print('User Document ID: $userDocumentId');
+      // هنا يمكنك تخزين الـ user_document_id مع الفصل في Firestore
+      await _storeSelectedClassInFirestore(userDocumentId);
+    }
+  }
+
+  Future<void> _storeSelectedClassInFirestore(String userDocumentId) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // تخزين الـ user_document_id مع الفصل في Firestore
+    try {
+      await firestore.collection('users').doc(userDocumentId).set({
+        'selected_class': selectedClass,
+      }, SetOptions(merge: true)); // دمج البيانات مع البيانات الموجودة بالفعل
+      print('Class stored successfully in Firestore.');
+    } catch (e) {
+      print('Error storing class in Firestore: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,47 +55,52 @@ class _FirstUpPageState extends State<FirstUpPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text(
-            'Choose Your Age',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
+          Text(
+            'اختر فصلك الدراسي',
+            style: GoogleFonts.cairo(
+              fontSize: 24,
+              fontWeight: FontWeight.bold, // جعل الخط عريض
+              color: Colors.lightBlue, // لون الخط أبيض
+            ),
+            textAlign: TextAlign.center, // وضع النص في المنتصف
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              AgeOption(
-                text: '10-16',
-                imagePath: 'lib/images/age2.png',
+              ClassOption(
+                text: 'من الفصل الأول إلى الرابع',
+                imagePath: 'lib/images/age2.png', // الصور كما هي دون تغيير
                 height: 300,
-                isSelected: selectedAge == '10-16',
+                isSelected: selectedClass == 'من الفصل الأول إلى الرابع',
                 onTap: () {
                   setState(() {
-                    selectedAge = '10-16';
+                    selectedClass = 'من الفصل الأول إلى الرابع';
                   });
                 },
               ),
               const SizedBox(width: 20),
-              AgeOption(
-                text: '17-24',
-                imagePath: 'lib/images/age2.png',
+              ClassOption(
+                text: 'فوق الفصل الرابع',
+                imagePath: 'lib/images/age2.png', // الصور كما هي دون تغيير
                 height: 400,
-                isSelected: selectedAge == '17-24',
+                isSelected: selectedClass == 'فوق الفصل الرابع',
                 onTap: () {
                   setState(() {
-                    selectedAge = '17-24';
+                    selectedClass = 'فوق الفصل الرابع';
                   });
                 },
               ),
               const SizedBox(width: 20),
-              AgeOption(
-                text: '25-40',
-                imagePath: 'lib/images/age3.png',
+              ClassOption(
+                text: 'خريج',
+                imagePath: 'lib/images/age3.png', // الصور كما هي دون تغيير
                 height: 500,
-                isSelected: selectedAge == '25-40',
+                isSelected: selectedClass == 'خريج',
                 onTap: () {
                   setState(() {
-                    selectedAge = '25-40';
+                    selectedClass = 'خريج';
                   });
                 },
               ),
@@ -80,9 +119,12 @@ class _FirstUpPageState extends State<FirstUpPage> {
                   backgroundColor: Colors.grey,
                   padding: const EdgeInsets.all(20),
                 ),
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(color: Colors.white),
+                child: Directionality(
+                  textDirection: TextDirection.rtl, // ضبط اتجاه النص إلى RTL
+                  child: Text(
+                    'تخطي',
+                    style: GoogleFonts.cairo(color: Colors.white),
+                  ),
                 ),
               ),
               ElevatedButton(
@@ -98,9 +140,12 @@ class _FirstUpPageState extends State<FirstUpPage> {
                   padding: const EdgeInsets.all(35),
                   textStyle: const TextStyle(fontSize: 20),
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(color: Colors.white),
+                child: Directionality(
+                  textDirection: TextDirection.rtl, // ضبط اتجاه النص إلى RTL
+                  child: Text(
+                    'استمرار',
+                    style: GoogleFonts.cairo(color: Colors.white),
+                  ),
                 ),
               ),
             ],
@@ -111,14 +156,14 @@ class _FirstUpPageState extends State<FirstUpPage> {
   }
 }
 
-class AgeOption extends StatelessWidget {
+class ClassOption extends StatelessWidget {
   final String text;
   final String imagePath;
   final double height;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const AgeOption({super.key, 
+  const ClassOption({super.key,
     required this.text,
     required this.imagePath,
     required this.height,
@@ -158,7 +203,12 @@ class AgeOption extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     text,
-                    style: const TextStyle(fontSize: 18, color: Colors.blue),
+                    style: GoogleFonts.cairo(
+                      fontSize: 18,
+                      color: Colors.white, // جعل اللون أبيض
+                      fontWeight: FontWeight.bold, // جعل الخط عريض
+                    ),
+                    textAlign: TextAlign.center, // وضع النص في المنتصف
                   ),
                 ],
               ),

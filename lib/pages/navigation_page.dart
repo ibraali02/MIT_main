@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'CurrentCourses_Page.dart';
 import 'home_page.dart';
 import 'saved_page.dart';
@@ -16,7 +17,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const CurrentCoursesPage(), // Replace SearchPage with CurrentCoursesPage
+    const CurrentCoursesPage(),
     const SavedPage(),
     const ProfilePage(),
   ];
@@ -24,7 +25,10 @@ class _NavigationPageState extends State<NavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: Directionality(
+        textDirection: TextDirection.rtl, // تعيين اتجاه الكتابة من اليمين لليسار
+        child: _pages[_currentIndex],
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -45,31 +49,31 @@ class _NavigationPageState extends State<NavigationPage> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFFEFAC52), // Color for selected items
-          unselectedItemColor: const Color(0xFF0096AB), // Color for unselected items
+          selectedItemColor: const Color(0xFFEFAC52),
+          unselectedItemColor: const Color(0xFF0096AB),
           showUnselectedLabels: true,
           selectedFontSize: 14,
           unselectedFontSize: 12,
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined, size: 28),
               activeIcon: Icon(Icons.home, size: 30),
-              label: 'Home',
+              label: 'الرئيسية', // Pass string label here
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.class_outlined, size: 28), // Updated Icon
-              activeIcon: Icon(Icons.class_, size: 30), // Updated Icon
-              label: 'Courses', // Updated Label
+              icon: Icon(Icons.class_outlined, size: 28),
+              activeIcon: Icon(Icons.class_, size: 30),
+              label: 'الدورات', // Pass string label here
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.bookmark_border, size: 28),
               activeIcon: Icon(Icons.bookmark, size: 30),
-              label: 'Saved',
+              label: 'المحفوظات', // Pass string label here
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline, size: 28),
               activeIcon: Icon(Icons.person, size: 30),
-              label: 'Profile',
+              label: 'الملف الشخصي', // Pass string label here
             ),
           ],
         ),

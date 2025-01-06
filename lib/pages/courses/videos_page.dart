@@ -18,7 +18,6 @@ class _VideosPageState extends State<VideosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -31,7 +30,7 @@ class _VideosPageState extends State<VideosPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No videos available.'));
+            return const Center(child: Text('لا توجد مقاطع فيديو.'));
           }
 
           final videos = snapshot.data!.docs;
@@ -47,10 +46,16 @@ class _VideosPageState extends State<VideosPage> {
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text(videoName),
-                  subtitle: Text(description),
+                  title: Text(
+                    videoName,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
+                  subtitle: Text(
+                    description,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.play_circle_fill, color: Color(0xFFEFAC52)), // Gold color for icon
+                    icon: const Icon(Icons.play_circle_fill, color: Color(0xFFEFAC52)),
                     onPressed: () async {
                       if (fileUrl.isNotEmpty) {
                         try {
@@ -60,12 +65,12 @@ class _VideosPageState extends State<VideosPage> {
                           );
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not open video: $e')),
+                            SnackBar(content: Text('تعذر فتح الفيديو: $e')),
                           );
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Invalid file URL')),
+                          const SnackBar(content: Text('رابط الملف غير صالح')),
                         );
                       }
                     },
@@ -98,7 +103,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
     try {
       if (_selectedFile == null || _selectedFile!.files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No file selected')),
+          const SnackBar(content: Text('لم يتم اختيار ملف')),
         );
         return;
       }
@@ -109,7 +114,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
 
       if (filePath == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: File path is null')),
+          const SnackBar(content: Text('خطأ: مسار الملف فارغ')),
         );
         return;
       }
@@ -139,7 +144,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video uploaded successfully')),
+        const SnackBar(content: Text('تم تحميل الفيديو بنجاح')),
       );
 
       setState(() {
@@ -151,7 +156,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading video: $e')),
+        SnackBar(content: Text('خطأ في تحميل الفيديو: $e')),
       );
     }
   }
@@ -164,7 +169,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
 
     if (result == null || result.files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No file selected')),
+        const SnackBar(content: Text('لم يتم اختيار ملف')),
       );
       return;
     }
@@ -179,8 +184,8 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Upload Video'),
-        backgroundColor: const Color(0xFF0096AB), // Blue color for app bar
+        title: const Text('تحميل فيديو', style: TextStyle(fontFamily: 'Cairo')),
+        backgroundColor: const Color(0xFF0096AB),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -190,15 +195,15 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
             TextField(
               controller: videoNameController,
               decoration: const InputDecoration(
-                labelText: 'Video Name',
-                labelStyle: TextStyle(color: Color(0xFF0096AB)), // Blue color for label
+                labelText: 'اسم الفيديو',
+                labelStyle: TextStyle(color: Color(0xFF0096AB), fontFamily: 'Cairo'),
               ),
             ),
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(
-                labelText: 'Description',
-                labelStyle: TextStyle(color: Color(0xFF0096AB)), // Blue color for label
+                labelText: 'الوصف',
+                labelStyle: TextStyle(color: Color(0xFF0096AB), fontFamily: 'Cairo'),
               ),
             ),
             const SizedBox(height: 20),
@@ -206,23 +211,23 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Selected File: ${_selectedFile!.files.first.name}'),
+                Text('الملف المختار: ${_selectedFile!.files.first.name}', style: TextStyle(fontFamily: 'Cairo')),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _uploadVideo(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEFAC52), // Gold color for button
+                    backgroundColor: const Color(0xFFEFAC52),
                   ),
-                  child: const Text('Save Video'),
+                  child: const Text('حفظ الفيديو', style: TextStyle(fontFamily: 'Cairo')),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEFAC52), // Gold color for button
+                backgroundColor: const Color(0xFFEFAC52),
               ),
-              child: const Text('Pick a Video file'),
+              child: const Text('اختار ملف فيديو', style: TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),

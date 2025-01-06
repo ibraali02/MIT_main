@@ -60,7 +60,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
 
     if (completedCourses.docs.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Course $courseId is already marked as completed!')),
+        SnackBar(content: Text('الدورة $courseId تم تصنيفها كمكتملة!')),
       );
       return;
     }
@@ -73,7 +73,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
     await studentRef.collection('course_enrolled').doc(documentId).delete();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Course $courseId marked as completed!')),
+      SnackBar(content: Text('الدورة $courseId تم تصنيفها كمكتملة!')),
     );
 
     setState(() {
@@ -95,11 +95,12 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
             backgroundColor: const Color(0xFF0096AB),
             centerTitle: true,
             title: const Text(
-              'Current Courses',
+              'الدورات الحالية',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
+                fontFamily: 'Cairo',
               ),
             ),
           ),
@@ -114,7 +115,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Text('خطأ: ${snapshot.error}'),
             );
           }
 
@@ -123,11 +124,12 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
           if (courses == null || courses.isEmpty) {
             return const Center(
               child: Text(
-                'No enrolled courses found.',
+                'لا توجد دورات مسجلة.',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0096AB),
+                  fontFamily: 'Cairo',
                 ),
               ),
             );
@@ -137,7 +139,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
             itemCount: courses.length,
             itemBuilder: (context, index) {
               final course = courses[index];
-              final courseName = course['course_name'] ?? 'Unknown Course';
+              final courseName = course['course_name'] ?? 'دورة غير معروفة';
               final courseId = course['course_id'] ?? 'N/A';
               final documentId = course['id'];
               final enrolledAt = course['enrolled_at']?.toDate().toString() ?? 'N/A';
@@ -151,24 +153,24 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF0096AB),
+                      fontFamily: 'Cairo',
                     ),
                   ),
                   subtitle: Text(
-                    'Course ID: $courseId\nEnrolled At: $enrolledAt',
+                    'رقم الدورة: $courseId\nتاريخ التسجيل: $enrolledAt',
                     style: const TextStyle(color: Color(0xFFEFAC52)),
                   ),
                   trailing: ElevatedButton(
                     onPressed: () => _markCourseAsCompleted(courseId, documentId),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEFAC52), // لون الخلفية
-                      foregroundColor: const Color(0xFFffffff), // لون النص
+                      backgroundColor: const Color(0xFFEFAC52),
+                      foregroundColor: const Color(0xFFffffff),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8), // زوايا مستديرة
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Mark as Completed'),
+                    child: const Text('تم إكمال الدورة'),
                   ),
-
                   onTap: () {
                     Navigator.push(
                       context,

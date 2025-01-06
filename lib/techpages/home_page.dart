@@ -13,19 +13,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<String> categories = [
-    'All',
-    'Technology',
-    'Information Technology',
-    'Programming Languages',
-    'Cybersecurity',
-    'Data Science',
-    'Web Development',
-    'Mobile Development',
-    'Artificial Intelligence',
+    'الكل',
+    'التكنولوجيا',
+    'تكنولوجيا المعلومات',
+    'لغات البرمجة',
+    'الأمن السيبراني',
+    'الذكاء الاصطناعي',
+    'علوم البيانات',
+    'تطوير الويب',
+    'تطوير تطبيقات الهواتف',
   ];
 
-  String selectedCategory = 'All';
-  String studentName = "Loading...";
+  String selectedCategory = 'الكل';
+  String studentName = "جاري التحميل...";
   String? userToken;
 
   @override
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
       if (studentDoc.exists) {
         setState(() {
-          studentName = studentDoc['fullName'] ?? "Unknown"; // Assuming the field is 'fullName'
+          studentName = studentDoc['fullName'] ?? "غير معروف"; // Assuming the field is 'fullName'
         });
       }
     }
@@ -57,16 +57,18 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: AppBar(                automaticallyImplyLeading: false,
+
         backgroundColor: const Color(0xFF0096AB),
         elevation: 1,
         centerTitle: true,
         title: Text(
-          'Hello, Teacher',
+          'مرحباً،يا معلم',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            fontFamily: 'Cairo',
           ),
         ),
         shape: const ContinuousRectangleBorder(
@@ -78,9 +80,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(
-        Icons.add,
-        color: Colors.yellow, // تغيير اللون إلى الأصفر
-      ),
+              Icons.add,
+              color: Colors.yellow, // تغيير اللون إلى الأصفر
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -92,16 +94,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildCategoryDropdown(),
-            const SizedBox(height: 20),
-            _buildCoursesGrid(),
-          ],
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildCategoryDropdown(),
+              const SizedBox(height: 20),
+              _buildCoursesGrid(),
+            ],
+          ),
         ),
       ),
     );
@@ -130,7 +135,7 @@ class _HomePageState extends State<HomePage> {
             value: category,
             child: Text(
               category,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, fontFamily: 'Cairo'),
             ),
           );
         }).toList(),
@@ -152,13 +157,13 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading courses'));
+          return const Center(child: Text('حدث خطأ في تحميل الدورات'));
         }
 
         final courses = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final category = data['category'] ?? '';
-          if (selectedCategory == 'All') {
+          if (selectedCategory == 'الكل') {
             return true;
           }
           return category == selectedCategory;
@@ -167,8 +172,8 @@ class _HomePageState extends State<HomePage> {
         if (courses.isEmpty) {
           return const Center(
             child: Text(
-              'No courses found for this category.',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              'لم يتم العثور على دورات لهذه الفئة.',
+              style: TextStyle(fontSize: 16, color: Colors.grey, fontFamily: 'Cairo'),
             ),
           );
         }
@@ -270,7 +275,7 @@ class _HomePageState extends State<HomePage> {
           // Show a message if the user is not the course owner
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('You cannot view this course as you are not the owner.'),
+              content: Text('لا يمكنك مشاهدة هذه الدورة لأنك لست المالك.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -312,6 +317,7 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF0096AB),
+                          fontFamily: 'Cairo',
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -322,24 +328,27 @@ class _HomePageState extends State<HomePage> {
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
+                          fontFamily: 'Cairo',
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Teacher: $teacher',
+                        'المعلم: $teacher',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
+                          fontFamily: 'Cairo',
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Category: $category',
+                        'الفئة: $category',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFFEFAC52),
+                          fontFamily: 'Cairo',
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -354,16 +363,18 @@ class _HomePageState extends State<HomePage> {
                               fontSize: 14,
                               color: Colors.grey,
                               fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
                             ),
                           ),
                         ],
                       )
                           : const Text(
-                        'No Rating Yet',
+                        'لا توجد تقييمات بعد',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey,
+                          fontFamily: 'Cairo',
                         ),
                       ),
                     ],

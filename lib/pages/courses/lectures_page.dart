@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart'; // استيراد مكتبة Google Fonts
 
 class LecturesPage extends StatefulWidget {
   final String courseId;
@@ -18,71 +19,78 @@ class _LecturesPageState extends State<LecturesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: Directionality(
+        textDirection: TextDirection.rtl, // تعيين اتجاه النص من اليمين لليسار
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('courses')
+              .doc(widget.courseId)
+              .collection('lectures')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('courses')
-            .doc(widget.courseId)
-            .collection('lectures')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('لا توجد محاضرات متاحة.'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No lectures available.'));
-          }
+            final lectures = snapshot.data!.docs;
 
-          final lectures = snapshot.data!.docs;
+            return ListView.builder(
+              itemCount: lectures.length,
+              itemBuilder: (context, index) {
+                final lecture = lectures[index];
+                final lectureName = lecture['lectureName'];
+                final description = lecture['description'];
+                final professorName = lecture['professorName'];
+                final fileUrl = lecture['fileUrl'];
 
-          return ListView.builder(
-            itemCount: lectures.length,
-            itemBuilder: (context, index) {
-              final lecture = lectures[index];
-              final lectureName = lecture['lectureName'];
-              final description = lecture['description'];
-              final professorName = lecture['professorName'];
-              final fileUrl = lecture['fileUrl'];
-
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                color: const Color(0xFFF5F5F5), // Card background color
-                child: ListTile(
-                  title: Text(
-                    lectureName,
-                    style: const TextStyle(color: Color(0xFF0096AB), fontWeight: FontWeight.bold), // Text color for lecture name
-                  ),
-                  subtitle: Text(
-                    'Professor: $professorName\n$description',
-                    style: const TextStyle(color: Colors.black), // Text color for description
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.picture_as_pdf, color: Color(0xFFEFAC52)), // Set color for PDF icon
-                    onPressed: () async {
-                      if (fileUrl.isNotEmpty) {
-                        try {
-                          await launchUrl(
-                            Uri.parse(fileUrl),
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } catch (e) {
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  color: const Color(0xFFF5F5F5),
+                  child: ListTile(
+                    title: Text(
+                      lectureName,
+                      style: GoogleFonts.cairo( // استخدام خط Cairo
+                        color: const Color(0xFF0096AB),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'الأستاذ: $professorName\n$description',
+                      style: GoogleFonts.cairo( // استخدام خط Cairo
+                        color: Colors.black,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.picture_as_pdf, color: Color(0xFFEFAC52)),
+                      onPressed: () async {
+                        if (fileUrl.isNotEmpty) {
+                          try {
+                            await launchUrl(
+                              Uri.parse(fileUrl),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('لم نتمكن من فتح ملف PDF: $e')),
+                            );
+                          }
+                        } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Could not open PDF file: $e')),
+                            const SnackBar(content: Text('رابط الملف غير صالح')),
                           );
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Invalid file URL')),
-                        );
-                      }
-                    },
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -107,7 +115,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
     try {
       if (_selectedFile == null || _selectedFile!.files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No file selected')),
+          const SnackBar(content: Text('لم يتم اختيار ملف')),
         );
         return;
       }
@@ -118,7 +126,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
 
       if (filePath == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: File path is null')),
+          const SnackBar(content: Text('خطأ: مسار الملف فارغ')),
         );
         return;
       }
@@ -149,7 +157,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lecture uploaded successfully')),
+        const SnackBar(content: Text('تم رفع المحاضرة بنجاح')),
       );
 
       setState(() {
@@ -162,7 +170,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading lecture: $e')),
+        SnackBar(content: Text('خطأ في رفع المحاضرة: $e')),
       );
     }
   }
@@ -175,7 +183,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
 
     if (result == null || result.files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No file selected')),
+        const SnackBar(content: Text('لم يتم اختيار ملف')),
       );
       return;
     }
@@ -189,50 +197,65 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0096AB), // Set AppBar color
-        title: const Text('Upload Lecture', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF0096AB),
+        title: Text(
+          'رفع محاضرة',
+          style: GoogleFonts.cairo(color: Colors.white), // استخدام خط Cairo
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: lectureNameController,
-              decoration: const InputDecoration(labelText: 'Lecture Name'),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: professorNameController,
-              decoration: const InputDecoration(labelText: 'Professor Name'),
-            ),
-            const SizedBox(height: 20),
-            _selectedFile != null
-                ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Selected File: ${_selectedFile!.files.first.name}'),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () => _uploadPdf(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEFAC52), // Button color
-                  ),
-                  child: const Text('Save Lecture'),
+      body: Directionality(
+        textDirection: TextDirection.rtl, // تعيين اتجاه النص من اليمين لليسار
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: lectureNameController,
+                decoration: InputDecoration(
+                  labelText: 'اسم المحاضرة',
+                  labelStyle: GoogleFonts.cairo(), // استخدام خط Cairo
                 ),
-              ],
-            )
-                : ElevatedButton(
-              onPressed: _pickFile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEFAC52), // Button color
               ),
-              child: const Text('Pick a PDF file'),
-            ),
-          ],
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'الوصف',
+                  labelStyle: GoogleFonts.cairo(), // استخدام خط Cairo
+                ),
+              ),
+              TextField(
+                controller: professorNameController,
+                decoration: InputDecoration(
+                  labelText: 'اسم الأستاذ',
+                  labelStyle: GoogleFonts.cairo(), // استخدام خط Cairo
+                ),
+              ),
+              const SizedBox(height: 20),
+              _selectedFile != null
+                  ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('الملف المختار: ${_selectedFile!.files.first.name}', style: GoogleFonts.cairo()), // استخدام خط Cairo
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => _uploadPdf(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEFAC52),
+                    ),
+                    child: const Text('حفظ المحاضرة'),
+                  ),
+                ],
+              )
+                  : ElevatedButton(
+                onPressed: _pickFile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEFAC52),
+                ),
+                child: const Text('اختيار ملف PDF'),
+              ),
+            ],
+          ),
         ),
       ),
     );

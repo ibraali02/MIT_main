@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // إضافة مكتبة Google Fonts
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Ensure Supabase is configured
@@ -20,23 +21,23 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _collegeController = TextEditingController();
   FilePickerResult? _selectedFile;
   bool _isLoading = false;
-  bool _isAccepted = false; // To track if the request has been accepted
+  bool _isAccepted = false;
 
   Future<void> _pickFile() async {
     try {
       _selectedFile = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
       if (_selectedFile == null || _selectedFile!.files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No file selected')),
+          const SnackBar(content: Text('لم يتم اختيار ملف')),
         );
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected file: ${_selectedFile!.files.first.name}')),
+        SnackBar(content: Text('تم اختيار الملف: ${_selectedFile!.files.first.name}')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error selecting file')),
+        const SnackBar(content: Text('حدث خطأ أثناء اختيار الملف')),
       );
     }
   }
@@ -56,7 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (_selectedFile == null || _selectedFile!.files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No file selected')),
+          const SnackBar(content: Text('لم يتم اختيار ملف')),
         );
         return;
       }
@@ -67,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (filePath == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: File path is null')),
+          const SnackBar(content: Text('خطأ: مسار الملف فارغ')),
         );
         return;
       }
@@ -83,10 +84,8 @@ class _SignUpPageState extends State<SignUpPage> {
           .from('lecture')
           .getPublicUrl(storagePath);
 
-      // Check if the collection exists
       var collectionRef = FirebaseFirestore.instance.collection('teacher_requests');
 
-      // Add a new document with accepted: false
       await collectionRef.add({
         'fullName': fullName,
         'email': email,
@@ -96,17 +95,16 @@ class _SignUpPageState extends State<SignUpPage> {
         'college': college,
         'cvUrl': downloadUrl,
         'requestTime': Timestamp.now(),
-        'accepted': false, // Set accepted to false by default
+        'accepted': false,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request sent and CV uploaded successfully!')),
+        const SnackBar(content: Text('تم إرسال الطلب وتحميل السيرة الذاتية بنجاح!')),
       );
     } catch (e) {
-      // Log error details
       print("Error details: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(content: Text('خطأ: ${e.toString()}')),
       );
     } finally {
       setState(() {
@@ -120,21 +118,24 @@ class _SignUpPageState extends State<SignUpPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirmation'),
-          content: const Text(
-            'Your information will be sent to the app owner. Once verified and approved, you will receive your login details via email or phone.',
-            style: TextStyle(fontSize: 16),
+          title: Text(
+            'تأكيد',
+            style: GoogleFonts.cairo(fontSize: 18),
+          ),
+          content: Text(
+            'سيتم إرسال معلوماتك إلى صاحب التطبيق. بمجرد التحقق والموافقة، ستتلقى تفاصيل تسجيل الدخول عبر البريد الإلكتروني أو الهاتف.',
+            style: GoogleFonts.cairo(fontSize: 16),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('إلغاء', style: GoogleFonts.cairo()),
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 if (_fullNameController.text.isNotEmpty &&
                     _emailController.text.isNotEmpty &&
                     _phoneController.text.isNotEmpty &&
@@ -144,11 +145,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   await _uploadPdfAndSendRequest();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
+                    const SnackBar(content: Text('يرجى ملء جميع الحقول')),
                   );
                 }
               },
-              child: const Text('Confirm'),
+              child: Text('تأكيد', style: GoogleFonts.cairo(fontSize: 16)),
             ),
           ],
         );
@@ -157,11 +158,10 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _checkIfAccepted(String documentId) async {
-    // Retrieve the approval status from Firestore to check if the request has been accepted
     var doc = await FirebaseFirestore.instance.collection('teacher_requests').doc(documentId).get();
     if (doc.exists) {
       setState(() {
-        _isAccepted = doc['accepted']; // Get the approval status from Firestore
+        _isAccepted = doc['accepted'];
       });
     }
   }
@@ -170,7 +170,10 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up as a Teacher', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'التسجيل كمعلم',
+          style: GoogleFonts.cairo(color: Colors.white, fontSize: 18),
+        ),
         backgroundColor: const Color(0xFF0096AB),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -183,54 +186,62 @@ class _SignUpPageState extends State<SignUpPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _fullNameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Phone'),
-              keyboardType: TextInputType.phone,
-            ),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
-            ),
-            TextField(
-              controller: _degreeController,
-              decoration: const InputDecoration(labelText: 'Degree'),
-            ),
-            TextField(
-              controller: _collegeController,
-              decoration: const InputDecoration(labelText: 'College'),
-            ),
+            _buildTextField(_fullNameController, 'الاسم الكامل'),
+            _buildTextField(_emailController, 'البريد الإلكتروني', keyboardType: TextInputType.emailAddress),
+            _buildTextField(_phoneController, 'رقم الهاتف', keyboardType: TextInputType.phone),
+            _buildTextField(_passwordController, 'كلمة المرور', obscureText: true),
+            _buildTextField(_degreeController, 'الشهادة الجامعية'),
+            _buildTextField(_collegeController, 'الكلية'),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _pickFile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0096AB),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: GoogleFonts.cairo(fontSize: 18),
               ),
-              child: const Text('Select CV (PDF)', style: TextStyle(color: Colors.white)),
+              child: const Text('اختيار السيرة الذاتية (PDF)', style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),
-            // Only show the "Send Request" button if the request has not been accepted yet
             if (!_isAccepted)
               ElevatedButton(
                 onPressed: _showConfirmationDialog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEFAC52),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  textStyle: GoogleFonts.cairo(fontSize: 20),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Send Request', style: TextStyle(color: Colors.white)),
+                    : const Text('إرسال الطلب', style: TextStyle(color: Colors.white)),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String labelText, {TextInputType keyboardType = TextInputType.text, bool obscureText = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        style: GoogleFonts.cairo(fontSize: 16),
+        textDirection: TextDirection.rtl,
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: GoogleFonts.cairo(fontSize: 14, color: const Color(0xFF9E9E9E)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF0096AB), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         ),
       ),
     );

@@ -26,7 +26,6 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
       throw Exception("User token not found. Please log in again.");
     }
 
-    // Fetch completed courses from Firestore
     final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
         .collection('students')
         .doc(userToken)
@@ -53,7 +52,7 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Completed Courses'),
+        title: const Text('الدورات المكتملة'),
         backgroundColor: const Color(0xFF0096AB),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -65,7 +64,7 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Text('حدث خطأ: ${snapshot.error}'),
             );
           }
 
@@ -74,7 +73,7 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
           if (completedCourses == null || completedCourses.isEmpty) {
             return const Center(
               child: Text(
-                'No completed courses found.',
+                'لا توجد دورات مكتملة.',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             );
@@ -86,7 +85,6 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
               final course = completedCourses[index];
               final courseId = course['course_id'] ?? 'N/A';
 
-              // Fetch course details by course_id
               return FutureBuilder<Map<String, dynamic>>(
                 future: _fetchCourseDetails(courseId),
                 builder: (context, courseSnapshot) {
@@ -95,15 +93,15 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
                   }
 
                   if (courseSnapshot.hasError) {
-                    return Text('Error fetching course details');
+                    return Text('حدث خطأ أثناء جلب تفاصيل الدورة');
                   }
 
                   final courseDetails = courseSnapshot.data ?? {};
-                  final category = courseDetails['category'] ?? 'No category';
-                  final details = courseDetails['details'] ?? 'No details available';
+                  final category = courseDetails['category'] ?? 'لا توجد فئة';
+                  final details = courseDetails['details'] ?? 'لا توجد تفاصيل';
                   final imageUrl = courseDetails['image_url'] ?? '';
-                  final teacher = courseDetails['teacher'] ?? 'No teacher info';
-                  final title = courseDetails['title'] ?? 'No title';
+                  final teacher = courseDetails['teacher'] ?? 'لا توجد معلومات عن المعلم';
+                  final title = courseDetails['title'] ?? 'لا يوجد عنوان';
 
                   return Card(
                     margin: const EdgeInsets.all(8.0),
@@ -116,22 +114,23 @@ class _CompletedCoursesPageState extends State<CompletedCoursesPage> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          fontFamily: 'Cairo', // Set the Cairo font
                         ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Category: $category',
-                            style: const TextStyle(color: Colors.white),
+                            'الفئة: $category',
+                            style: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
                           ),
                           Text(
-                            'Teacher: $teacher',
-                            style: const TextStyle(color: Colors.white),
+                            'المعلم: $teacher',
+                            style: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
                           ),
                           Text(
-                            'Details: $details',
-                            style: const TextStyle(color: Colors.white),
+                            'التفاصيل: $details',
+                            style: const TextStyle(color: Colors.white, fontFamily: 'Cairo'),
                           ),
                         ],
                       ),

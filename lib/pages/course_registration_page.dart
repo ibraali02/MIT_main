@@ -19,7 +19,7 @@ class CourseRegistrationPage extends StatelessWidget {
 
       if (userToken == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User token not found. Please log in again.')),
+          const SnackBar(content: Text('رمز المستخدم غير موجود. الرجاء تسجيل الدخول مرة أخرى.')),
         );
         return;
       }
@@ -34,7 +34,7 @@ class CourseRegistrationPage extends StatelessWidget {
 
       if (savedCourse.exists) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Course is already saved!')),
+          const SnackBar(content: Text('الدورة محفوظة بالفعل!')),
         );
         return;
       }
@@ -46,11 +46,11 @@ class CourseRegistrationPage extends StatelessWidget {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course saved successfully!')),
+        const SnackBar(content: Text('تم حفظ الدورة بنجاح!')),
       );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving course: $error')),
+        SnackBar(content: Text('خطأ في حفظ الدورة: $error')),
       );
     }
   }
@@ -62,7 +62,7 @@ class CourseRegistrationPage extends StatelessWidget {
 
       if (userToken == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User token not found. Please log in again.')),
+          const SnackBar(content: Text('رمز المستخدم غير موجود. الرجاء تسجيل الدخول مرة أخرى.')),
         );
         return;
       }
@@ -77,7 +77,7 @@ class CourseRegistrationPage extends StatelessWidget {
 
       if (enrolledCourse.exists) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You are already enrolled in this course!')),
+          const SnackBar(content: Text('أنت مسجل بالفعل في هذه الدورة!')),
         );
         Navigator.push(
           context,
@@ -95,7 +95,7 @@ class CourseRegistrationPage extends StatelessWidget {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You have been enrolled successfully!')),
+        const SnackBar(content: Text('تم التسجيل في الدورة بنجاح!')),
       );
 
       Navigator.push(
@@ -106,7 +106,7 @@ class CourseRegistrationPage extends StatelessWidget {
       );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error enrolling in course: $error')),
+        SnackBar(content: Text('خطأ في التسجيل في الدورة: $error')),
       );
     }
   }
@@ -117,11 +117,12 @@ class CourseRegistrationPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Register for $courseName',
+          'التسجيل في $courseName',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
+            fontFamily: 'Cairo',
           ),
         ),
         backgroundColor: Color(0xFF0096AB),
@@ -137,11 +138,11 @@ class CourseRegistrationPage extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return const Center(child: Text('Error loading course data'));
+              return const Center(child: Text('خطأ في تحميل بيانات الدورة'));
             }
 
             if (!snapshot.hasData || !snapshot.data!.exists) {
-              return const Center(child: Text('Course not found'));
+              return const Center(child: Text('الدورة غير موجودة'));
             }
 
             var courseData = snapshot.data!.data() as Map<String, dynamic>;
@@ -163,7 +164,6 @@ class CourseRegistrationPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Card for course details
                   Card(
                     elevation: 8,
                     shape: RoundedRectangleBorder(
@@ -180,12 +180,13 @@ class CourseRegistrationPage extends StatelessWidget {
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF0096AB),
+                              fontFamily: 'Cairo',
                             ),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Category: $category',
-                            style: TextStyle(fontSize: 16, color: Colors.black87),
+                            'الفئة: $category',
+                            style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                           ),
                           const SizedBox(height: 12),
                           Center(
@@ -201,27 +202,28 @@ class CourseRegistrationPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Details:',
+                            'التفاصيل:',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF0096AB),
+                              fontFamily: 'Cairo',
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             details,
-                            style: TextStyle(fontSize: 16, color: Colors.black87),
+                            style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Teacher: $teacher',
-                            style: TextStyle(fontSize: 16, color: Colors.black87),
+                            'المدرس: $teacher',
+                            style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Start Date: $startDate',
-                            style: TextStyle(fontSize: 16, color: Colors.black87),
+                            'تاريخ البدء: $startDate',
+                            style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                           ),
                           const SizedBox(height: 12),
                           Row(
@@ -232,12 +234,11 @@ class CourseRegistrationPage extends StatelessWidget {
                                   Icon(Icons.book, color: Color(0xFF0096AB)),
                                   SizedBox(width: 5),
                                   Text(
-                                    'Lectures: $numberOfLectures',
-                                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                                    'الدروس: $numberOfLectures',
+                                    style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                                   ),
                                 ],
                               ),
-
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -246,8 +247,8 @@ class CourseRegistrationPage extends StatelessWidget {
                               Icon(Icons.people, color: Color(0xFF0096AB)),
                               SizedBox(width: 5),
                               Text(
-                                'Students: $numberOfStudents',
-                                style: TextStyle(fontSize: 16, color: Colors.black87),
+                                'الطلاب: $numberOfStudents',
+                                style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                               ),
                             ],
                           ),
@@ -256,14 +257,13 @@ class CourseRegistrationPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Centered Save Button
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: () => _saveCourse(context),
                       icon: Icon(Icons.save_alt, color: Colors.white),
                       label: const Text(
-                        'Save Course',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        'حفظ الدورة',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Cairo'),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF0096AB),
@@ -278,14 +278,13 @@ class CourseRegistrationPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Centered Enroll Button
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: () => _enrollCourse(context),
                       icon: Icon(Icons.school, color: Colors.white),
                       label: const Text(
-                        'Enroll Now',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        'التسجيل الآن',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Cairo'),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFFEFAC52),

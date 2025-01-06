@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation/pages/splash.dart';
 import 'admin/tech.dart';
 
@@ -8,14 +9,18 @@ class RoleSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4), // خلفية فاتحة لطيفة
+      backgroundColor: const Color(0xFFF4F4F4),
       appBar: AppBar(
-        title: const Text(
-          'Select Role',
-          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        title: Text(
+          'اختر الدور',
+          style: GoogleFonts.tajawal(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+        backgroundColor: const Color(0xFF0096AB),
         elevation: 0,
       ),
       body: Center(
@@ -24,11 +29,15 @@ class RoleSelectionPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Please choose your role:',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0096AB)),
+              Text(
+                'يرجى اختيار دورك:',
+                style: GoogleFonts.tajawal(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0096AB),
+                ),
               ),
-              const SizedBox(height: 40), // مسافة بين العنوان والأزرار
+              const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -37,19 +46,23 @@ class RoleSelectionPage extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+                  backgroundColor: const Color(0xFF0096AB),
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // حواف مستديرة
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   elevation: 5,
                 ),
-                child: const Text(
+                child: Text(
                   'طالب',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(height: 20), // مسافة بين الأزرار
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -58,19 +71,23 @@ class RoleSelectionPage extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEFAC52), // الذهبي
+                  backgroundColor: const Color(0xFFEFAC52),
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // حواف مستديرة
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   elevation: 5,
                 ),
-                child: const Text(
+                child: Text(
                   'مدرس',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(height: 20), // مسافة بين الأزرار
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -79,16 +96,20 @@ class RoleSelectionPage extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // الأحمر
+                  backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // حواف مستديرة
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   elevation: 5,
                 ),
-                child: const Text(
+                child: Text(
                   'مدير',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],

@@ -63,7 +63,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Loading...'),
+              title: Text('جارٍ التحميل...'),
               backgroundColor: Color(0xFF0096AB), // Blue color
             ),
             body: Center(child: CircularProgressIndicator()),
@@ -71,18 +71,18 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
         } else if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Error'),
+              title: Text('خطأ'),
               backgroundColor: Color(0xFF0096AB), // Blue color
             ),
-            body: Center(child: Text('Error loading course details')),
+            body: Center(child: Text('خطأ في تحميل تفاصيل الدورة')),
           );
         } else if (!snapshot.hasData) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('No Data'),
+              title: Text('لا توجد بيانات'),
               backgroundColor: Color(0xFF0096AB), // Blue color
             ),
-            body: Center(child: Text('No course data available')),
+            body: Center(child: Text('لا توجد بيانات للدورة')),
           );
         }
 
@@ -100,6 +100,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
               style: TextStyle(
                 fontWeight: FontWeight.bold, // Make the title bold
                 color: Colors.white, // Set text color to white
+                fontFamily: 'Cairo', // Apply Cairo font
               ),
             ),
             backgroundColor: Color(0xFF0096AB), // Blue color
@@ -211,15 +212,17 @@ class CourseDetailsTab extends StatelessWidget {
                       fontSize: 28, // Increased font size for course name
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
+                      fontFamily: 'Cairo', // Apply Cairo font
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Instructor: $teacher',
+                    'المدرب: $teacher',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey,
+                      fontFamily: 'Cairo', // Apply Cairo font
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -228,6 +231,7 @@ class CourseDetailsTab extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black54,
+                      fontFamily: 'Cairo', // Apply Cairo font
                     ),
                   ),
                 ],

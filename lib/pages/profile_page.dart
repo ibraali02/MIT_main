@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:graduation/pages/signupstd.dart';
+import 'package:graduation/pages/stutech.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'courses/CompletedCoursesPage.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -73,17 +75,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
     await FirebaseFirestore.instance.collection('students').doc(_userDocumentId).update(updatedData);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile updated successfully!')),
+      const SnackBar(content: Text('تم تحديث الملف الشخصي بنجاح!')),
     );
   }
 
-  // Log out the user
   // Log out the user
   Future<void> _logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_document_id'); // حذف التوكن
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) =>SignUpStd()), // استبدل LoginPage بصفحة تسجيل الدخول الخاصة بك
+      MaterialPageRoute(builder: (context) => LoginPagee()),
     );
   }
 
@@ -99,9 +100,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-
         preferredSize: const Size.fromHeight(70.0),
-        child: AppBar( automaticallyImplyLeading: false,
+        child: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: const Color(0xFF0096AB), // Color for AppBar
           elevation: 4.0,
           shape: const RoundedRectangleBorder(
@@ -110,9 +111,9 @@ class _ProfilePageState extends State<ProfilePage> {
               bottomRight: Radius.circular(20),
             ),
           ),
-          title: const Text(
-            'Profile',
-            style: TextStyle(
+          title: Text(
+            'الملف الشخصي',
+            style: GoogleFonts.cairo(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white, // Set the text color to white
@@ -140,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
           if (userData == null) {
             return const Center(
               child: Text(
-                'No user data found.',
+                'لا توجد بيانات للمستخدم.',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0096AB)),
               ),
             );
@@ -152,37 +153,37 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 _buildEditableCard(
                   icon: Icons.person,
-                  title: 'Full Name',
+                  title: 'الاسم الكامل',
                   controller: _fullNameController,
                   enabled: true, // Allow editing
                 ),
                 _buildEditableCard(
                   icon: Icons.email,
-                  title: 'Email',
+                  title: 'البريد الإلكتروني',
                   controller: _emailController,
                   enabled: true, // Allow editing
                 ),
                 _buildEditableCard(
                   icon: Icons.location_city,
-                  title: 'City',
+                  title: 'المدينة',
                   controller: _cityController,
                   enabled: true, // Allow editing
                 ),
                 _buildEditableCard(
                   icon: Icons.transgender,
-                  title: 'Gender',
+                  title: 'الجنس',
                   controller: _genderController,
                   enabled: true, // Allow editing
                 ),
                 _buildEditableCard(
                   icon: Icons.phone,
-                  title: 'Phone',
+                  title: 'الهاتف',
                   controller: _phoneController,
                   enabled: true, // Allow editing
                 ),
                 _buildEditableCard(
                   icon: Icons.confirmation_number,
-                  title: 'Registration Number',
+                  title: 'رقم التسجيل',
                   controller: _registrationNumberController,
                   enabled: true, // Allow editing
                 ),
@@ -196,9 +197,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Save Changes',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  child: Text(
+                    'حفظ التعديلات',
+                    style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -211,9 +212,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  child: Text(
+                    'تسجيل الخروج',
+                    style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -226,9 +227,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'View Completed Courses',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  child: Text(
+                    'عرض الدورات المكتملة',
+                    style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
               ],
@@ -263,6 +264,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 enabled: enabled, // Allow editing if enabled
+                textDirection: TextDirection.rtl, // RTL text direction
+                style: GoogleFonts.cairo(), // Use Cairo font
               ),
             ),
           ],

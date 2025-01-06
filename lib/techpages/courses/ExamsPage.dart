@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'ExamDetailsPage.dart';
 import 'add_exam_page.dart'; // استيراد صفحة إضافة الامتحان
+import 'package:google_fonts/google_fonts.dart';
 
 class ExamsPage extends StatefulWidget {
   final String courseId;
@@ -16,7 +17,6 @@ class _ExamsPageState extends State<ExamsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('courses')
@@ -29,7 +29,7 @@ class _ExamsPageState extends State<ExamsPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No exams available.'));
+            return const Center(child: Text('لا توجد امتحانات.'));
           }
 
           final exams = snapshot.data!.docs;
@@ -52,14 +52,14 @@ class _ExamsPageState extends State<ExamsPage> {
                   contentPadding: const EdgeInsets.all(16),
                   title: Text(
                     examName,
-                    style: const TextStyle(
+                    style: GoogleFonts.cairo(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
                   subtitle: Text(
-                    'Duration: $examDuration minutes',
-                    style: const TextStyle(
+                    'المدة: $examDuration دقيقة',
+                    style: GoogleFonts.cairo(
                       color: Colors.white70,
                     ),
                   ),

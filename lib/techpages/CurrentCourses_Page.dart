@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'course_details_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CurrentCoursesPage extends StatefulWidget {
   const CurrentCoursesPage({super.key});
@@ -23,7 +24,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
   Future<void> _getTokenFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userToken = prefs.getString('token'); // Replace 'user_token' with your key
+      userToken = prefs.getString('token');
     });
   }
 
@@ -31,6 +32,7 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF0096AB),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -41,9 +43,9 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Current Courses',
-              style: TextStyle(
+            Text(
+              'الدورات الحالية',
+              style: GoogleFonts.cairo(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -65,29 +67,30 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (userToken == null) {
-            return const Center(child: Text('No token found.'));
+            return const Center(child: Text('لم يتم العثور على التوكن.'));
           }
           return _buildCoursesList();
         },
       ),
     );
   }
+
   Widget _buildCoursesList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('courses')
           .where('token', isEqualTo: userToken)
-          .where('isCompleted', isEqualTo: false) // فقط استرجاع الدورات غير المكتملة
+          .where('isCompleted', isEqualTo: false)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading courses.'));
+          return const Center(child: Text('حدث خطأ في تحميل الدورات.'));
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No courses found.'));
+          return const Center(child: Text('لم يتم العثور على الدورات.'));
         }
 
         final courses = snapshot.data!.docs;
@@ -99,12 +102,15 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
             return ListTile(
               title: Text(
                 course['title'],
-                style: TextStyle(
+                style: GoogleFonts.cairo(
                   color: const Color(0xFF0096AB),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              subtitle: Text(course['details'], style: TextStyle(color: const Color(0xFFEFAC52))),
+              subtitle: Text(
+                course['details'],
+                style: GoogleFonts.cairo(color: const Color(0xFFEFAC52)),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -129,9 +135,12 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
                     onPressed: () => _markCourseAsCompleted(courses[index].id),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xFF0096AB), // لون النص
+                      backgroundColor: const Color(0xFF0096AB),
                     ),
-                    child: const Text('انتهاء'),
+                    child: Text(
+                      'انتهاء',
+                      style: GoogleFonts.cairo(),
+                    ),
                   ),
                 ],
               ),
@@ -141,19 +150,19 @@ class _CurrentCoursesPageState extends State<CurrentCoursesPage> {
       },
     );
   }
-  // Function to mark the course as completed
+
   Future<void> _markCourseAsCompleted(String courseId) async {
     try {
       await FirebaseFirestore.instance.collection('courses').doc(courseId).update({
-        'completed': true, // Update the completed field to true
+        'completed': true,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course marked as completed!')),
+        const SnackBar(content: Text('تم تمييز الدورة على أنها مكتملة!')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to mark course as completed.')),
+        const SnackBar(content: Text('فشل في تمييز الدورة كمكتملة.')),
       );
     }
   }

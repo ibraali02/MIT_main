@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class AddCoursePage extends StatefulWidget {
   const AddCoursePage({super.key});
@@ -18,19 +19,19 @@ class _AddCoursePageState extends State<AddCoursePage> {
   final _teacherNameController = TextEditingController();
   XFile? _selectedImage;
   bool _loading = false;
-  String _selectedCategory = 'Technology';  // default category
+  String _selectedCategory = 'التكنولوجيا';  // default category in Arabic
 
-  // List of categories for the DropdownButton
+  // List of categories in Arabic for the DropdownButton
   final List<String> categories = [
-    'All',
-    'Technology',
-    'Information Technology',
-    'Programming Languages',
-    'Cybersecurity',
-    'Data Science',
-    'Web Development',
-    'Mobile Development',
-    'Artificial Intelligence',
+    'الكل',
+    'التكنولوجيا',
+    'تكنولوجيا المعلومات',
+    'لغات البرمجة',
+    'الأمن السيبراني',
+    'علوم البيانات',
+    'تطوير الويب',
+    'تطوير التطبيقات المحمولة',
+    'الذكاء الاصطناعي',
   ];
 
   // Function to upload image to Supabase Storage
@@ -78,7 +79,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
     if (title.isEmpty || details.isEmpty || teacher.isEmpty || _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields and select an image.')),
+        const SnackBar(content: Text('يرجى ملء جميع الحقول واختيار صورة.')),
       );
       return;
     }
@@ -92,13 +93,13 @@ class _AddCoursePageState extends State<AddCoursePage> {
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        throw Exception('User token not found. Please log in again.');
+        throw Exception('لم يتم العثور على رمز المستخدم. يرجى تسجيل الدخول مرة أخرى.');
       }
 
       final imageUrl = await uploadImageToSupabase(_selectedImage);
 
       if (imageUrl == null) {
-        throw Exception('Image upload failed.');
+        throw Exception('فشل تحميل الصورة.');
       }
 
       await FirebaseFirestore.instance.collection('courses').add({
@@ -109,17 +110,17 @@ class _AddCoursePageState extends State<AddCoursePage> {
         'image_url': imageUrl,
         'created_at': Timestamp.now(),
         'token': token,
-        'isCompleted': false,  // إضافة هذا الحقل
+        'isCompleted': false,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course added successfully!')),
+        const SnackBar(content: Text('تم إضافة الدورة بنجاح!')),
       );
 
       Navigator.of(context).pop();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding course: $e')),
+        SnackBar(content: Text('خطأ في إضافة الدورة: $e')),
       );
     } finally {
       setState(() {
@@ -127,6 +128,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
       });
     }
   }
+
   // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -138,12 +140,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No image selected.')),
+          const SnackBar(content: Text('لم يتم اختيار صورة.')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error selecting image.')),
+        const SnackBar(content: Text('خطأ في اختيار الصورة.')),
       );
     }
   }
@@ -152,7 +154,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Course'),
+        title: Text('إضافة دورة', style: GoogleFonts.cairo()), // Apply Cairo font
         backgroundColor: const Color(0xFF0096AB),
         centerTitle: true,
         foregroundColor: Colors.white,
@@ -162,8 +164,8 @@ class _AddCoursePageState extends State<AddCoursePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextField(controller: _courseTitleController, label: 'Course Title'),
-            _buildTextField(controller: _courseDetailsController, label: 'Course Details'),
+            _buildTextField(controller: _courseTitleController, label: 'عنوان الدورة'),
+            _buildTextField(controller: _courseDetailsController, label: 'تفاصيل الدورة'),
             // Dropdown menu for category selection
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -197,7 +199,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                       value: category,
                       child: Text(
                         category,
-                        style: TextStyle(
+                        style: GoogleFonts.cairo( // Apply Cairo font
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -210,7 +212,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                 ),
               ),
             ),
-            _buildTextField(controller: _teacherNameController, label: 'Teacher Name'),
+            _buildTextField(controller: _teacherNameController, label: 'اسم المعلم'),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -226,7 +228,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  child: const Text('Select Image', style: TextStyle(color: Colors.white)),
+                  child: Text('اختر صورة', style: GoogleFonts.cairo(color: Colors.white)), // Apply Cairo font
                 ),
               ],
             ),
@@ -243,10 +245,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
               ),
               child: _loading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                'Add Course',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+                  : Text('إضافة دورة', style: GoogleFonts.cairo(fontSize: 16, color: Colors.white)), // Apply Cairo font
             ),
           ],
         ),
@@ -263,6 +262,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
         controller: controller,
+        style: GoogleFonts.cairo(), // Apply Cairo font
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(

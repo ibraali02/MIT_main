@@ -17,7 +17,6 @@ class LecturesPage extends StatefulWidget {
 class _LecturesPageState extends State<LecturesPage> {
   Future<void> _deleteLecture(String lectureId) async {
     try {
-      // حذف المحاضرة من Firestore
       await FirebaseFirestore.instance
           .collection('courses')
           .doc(widget.courseId)
@@ -25,13 +24,12 @@ class _LecturesPageState extends State<LecturesPage> {
           .doc(lectureId)
           .delete();
 
-      // يمكن إضافة حذف الملف من Supabase إذا كان ضروريًا
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lecture deleted successfully')),
+        const SnackBar(content: Text('تم حذف المحاضرة بنجاح')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting lecture: $e')),
+        SnackBar(content: Text('خطأ في حذف المحاضرة: $e')),
       );
     }
   }
@@ -40,11 +38,11 @@ class _LecturesPageState extends State<LecturesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // حذف زر العودة
-        backgroundColor: Colors.white, // تغيير خلفية الـ AppBar إلى الأبيض
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF0096AB)), // تغيير لون زر الإضافة إلى الأزرق
+            icon: const Icon(Icons.add, color: Color(0xFF0096AB)),
             onPressed: () {
               Navigator.push(
                 context,
@@ -68,7 +66,7 @@ class _LecturesPageState extends State<LecturesPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No lectures available.'));
+            return const Center(child: Text('لا توجد محاضرات متاحة.'));
           }
 
           final lectures = snapshot.data!.docs;
@@ -77,7 +75,7 @@ class _LecturesPageState extends State<LecturesPage> {
             itemCount: lectures.length,
             itemBuilder: (context, index) {
               final lecture = lectures[index];
-              final lectureId = lecture.id; // الحصول على معرف المحاضرة
+              final lectureId = lecture.id;
               final lectureName = lecture['lectureName'];
               final description = lecture['description'];
               final professorName = lecture['professorName'];
@@ -90,11 +88,11 @@ class _LecturesPageState extends State<LecturesPage> {
                 child: ListTile(
                   title: Text(
                     lectureName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
                   ),
                   subtitle: Text(
-                    'Professor: $professorName\n$description',
-                    style: const TextStyle(color: Colors.black54),
+                    'الأستاذ: $professorName\n$description',
+                    style: const TextStyle(color: Colors.black54, fontFamily: 'Cairo'),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -110,19 +108,19 @@ class _LecturesPageState extends State<LecturesPage> {
                               );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Could not open PDF file: $e')),
+                                SnackBar(content: Text('تعذر فتح ملف PDF: $e')),
                               );
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Invalid file URL')),
+                              const SnackBar(content: Text('رابط الملف غير صالح')),
                             );
                           }
                         },
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteLecture(lectureId), // حذف المحاضرة عند الضغط
+                        onPressed: () => _deleteLecture(lectureId),
                       ),
                     ],
                   ),
@@ -133,7 +131,6 @@ class _LecturesPageState extends State<LecturesPage> {
         },
       ),
     );
-
   }
 }
 
@@ -156,7 +153,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
     try {
       if (_selectedFile == null || _selectedFile!.files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No file selected')),
+          const SnackBar(content: Text('لم يتم اختيار ملف')),
         );
         return;
       }
@@ -167,7 +164,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
 
       if (filePath == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: File path is null')),
+          const SnackBar(content: Text('خطأ: مسار الملف فارغ')),
         );
         return;
       }
@@ -198,7 +195,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lecture uploaded successfully')),
+        const SnackBar(content: Text('تم رفع المحاضرة بنجاح')),
       );
 
       setState(() {
@@ -211,7 +208,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading lecture: $e')),
+        SnackBar(content: Text('خطأ في رفع المحاضرة: $e')),
       );
     }
   }
@@ -224,7 +221,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
 
     if (result == null || result.files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No file selected')),
+        const SnackBar(content: Text('لم يتم اختيار ملف')),
       );
       return;
     }
@@ -238,7 +235,7 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload Lecture'),
+        title: const Text('رفع محاضرة'),
         backgroundColor: const Color(0xFF0096AB),
       ),
       body: Padding(
@@ -249,46 +246,52 @@ class _UploadLecturePageState extends State<UploadLecturePage> {
             TextField(
               controller: lectureNameController,
               decoration: const InputDecoration(
-                labelText: 'Lecture Name',
+                labelText: 'اسم المحاضرة',
                 labelStyle: TextStyle(color: Color(0xFF0096AB)),
                 border: OutlineInputBorder(),
               ),
+              textDirection: TextDirection.rtl,
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(
-                labelText: 'Description',
+                labelText: 'الوصف',
                 labelStyle: TextStyle(color: Color(0xFF0096AB)),
                 border: OutlineInputBorder(),
               ),
+              textDirection: TextDirection.rtl,
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: professorNameController,
               decoration: const InputDecoration(
-                labelText: 'Professor Name',
+                labelText: 'اسم الأستاذ',
                 labelStyle: TextStyle(color: Color(0xFF0096AB)),
                 border: OutlineInputBorder(),
               ),
+              textDirection: TextDirection.rtl,
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 20),
             _selectedFile != null
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Selected File: ${_selectedFile!.files.first.name}'),
+                Text('تم اختيار الملف: ${_selectedFile!.files.first.name}'),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _uploadPdf(context),
-                  child: const Text('Save Lecture'),
+                  child: const Text('حفظ المحاضرة'),
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEFAC52)),
                 ),
               ],
             )
                 : ElevatedButton(
               onPressed: _pickFile,
-              child: const Text('Pick a PDF file'),
+              child: const Text('اختر ملف PDF'),
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEFAC52)),
             ),
           ],

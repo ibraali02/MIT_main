@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart'; // استيراد مكتبة Google Fonts
 import 'course_details_page.dart';
 import 'course_registration_page.dart';
 
@@ -13,19 +14,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<String> categories = [
-    'All',
-    'Technology',
-    'Information Technology',
-    'Programming Languages',
-    'Cybersecurity',
-    'Data Science',
-    'Web Development',
-    'Mobile Development',
-    'Artificial Intelligence',
+    'الكل',
+    'التكنولوجيا',
+    'تقنية المعلومات',
+    'لغات البرمجة',
+    'أمن المعلومات',
+    'البيانات الضخمة',
+    'تطوير الويب',
+    'تطوير الهواتف',
+    'الذكاء الاصطناعي',
   ];
 
-  String selectedCategory = 'All';
-  String studentName = "Loading...";
+  String selectedCategory = 'الكل';
+  String studentName = "جاري التحميل...";
 
   @override
   void initState() {
@@ -46,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
       if (studentDoc.exists) {
         setState(() {
-          studentName = studentDoc['fullName'] ?? "Unknown"; // Assuming the field is 'name'
+          studentName = studentDoc['fullName'] ?? "مجهول"; // Assuming the field is 'name'
         });
       }
     }
@@ -57,15 +58,17 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar( automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF0096AB), // استخدام اللون الأول
+        backgroundColor: const Color(0xFF0096AB),
         elevation: 1,
-        centerTitle: true, // لتوسيط العنوان
+        centerTitle: true,
         title: Text(
-          'Hello, $studentName!',
-          style: const TextStyle(
-            color: Colors.white, // تغيير لون النص إلى الأبيض
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+          'مرحباً، $studentName!',
+          style: GoogleFonts.cairo(
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         shape: const ContinuousRectangleBorder(
@@ -75,21 +78,26 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              'What do you wanna learn today?',
-              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 20),
-            _buildCategoryDropdown(),
-            const SizedBox(height: 20),
-            _buildCoursesGrid(),
-          ],
+      body: Directionality(  // تعيين اتجاه النص إلى RTL
+        textDirection: TextDirection.rtl,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                'ماذا ترغب في تعلمه اليوم؟',
+                style: GoogleFonts.cairo(
+                  textStyle: TextStyle(fontSize: 18, color: Colors.grey[700]),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildCategoryDropdown(),
+              const SizedBox(height: 20),
+              _buildCoursesGrid(),
+            ],
+          ),
         ),
       ),
     );
@@ -118,7 +126,7 @@ class _HomePageState extends State<HomePage> {
             value: category,
             child: Text(
               category,
-              style: const TextStyle(fontSize: 16),
+              style: GoogleFonts.cairo(textStyle: const TextStyle(fontSize: 16)),
             ),
           );
         }).toList(),
@@ -140,13 +148,13 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading courses'));
+          return const Center(child: Text('حدث خطأ أثناء تحميل الدورات'));
         }
 
         final courses = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final category = data['category'] ?? '';
-          if (selectedCategory == 'All') {
+          if (selectedCategory == 'الكل') {
             return true;
           }
           return category == selectedCategory;
@@ -155,7 +163,7 @@ class _HomePageState extends State<HomePage> {
         if (courses.isEmpty) {
           return const Center(
             child: Text(
-              'No courses found for this category.',
+              'لا توجد دورات في هذه الفئة.',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           );
@@ -279,10 +287,12 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0096AB), // اللون الثاني
+                    style: GoogleFonts.cairo(
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0096AB),
+                      ),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -290,27 +300,33 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 2),
                   Text(
                     details,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                    style: GoogleFonts.cairo(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Teacher: $teacher',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                    'المدرس: $teacher',
+                    style: GoogleFonts.cairo(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Category: $category',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFFEFAC52), // اللون الأول
+                    'الفئة: $category',
+                    style: GoogleFonts.cairo(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFEFAC52),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -321,16 +337,18 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 8),
                       Text(
                         rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.cairo(
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                   )
                       : const Text(
-                    'No Rating Yet',
+                    'لا توجد تقييمات بعد',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

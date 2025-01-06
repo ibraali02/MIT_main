@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'CurrentCourses_Page.dart';
 import 'home_page.dart';
 import 'saved_page.dart';
@@ -16,7 +17,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const CurrentCoursesPage(), // Replace SearchPage with CurrentCoursesPage
+    const CurrentCoursesPage(),
     const SavedPage(),
     const ProfilePage(),
   ];
@@ -45,33 +46,35 @@ class _NavigationPageState extends State<NavigationPage> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFF0096AB),  // اللون الأزرق المخصص
-          unselectedItemColor: const Color(0xFFEFAC52),  // اللون الذهبي المخصص
+          selectedItemColor: const Color(0xFF0096AB),
+          unselectedItemColor: const Color(0xFFEFAC52),
           showUnselectedLabels: true,
           selectedFontSize: 14,
           unselectedFontSize: 12,
-          items: const [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined, size: 28),
               activeIcon: Icon(Icons.home, size: 30),
-              label: 'Home',
+              label: 'الرئيسية',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.class_outlined, size: 28), // Updated Icon
-              activeIcon: Icon(Icons.class_, size: 30), // Updated Icon
-              label: 'Courses', // Updated Label
+              icon: Icon(Icons.class_outlined, size: 28),
+              activeIcon: Icon(Icons.class_, size: 30),
+              label: 'المستمرة',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.bookmark_border, size: 28),
               activeIcon: Icon(Icons.bookmark, size: 30),
-              label: 'Saved',
+              label: 'المكتملة',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline, size: 28),
               activeIcon: Icon(Icons.person, size: 30),
-              label: 'Profile',
+              label: 'الملف الشخصي',
             ),
           ],
+          selectedLabelStyle: GoogleFonts.cairo(),
+          unselectedLabelStyle: GoogleFonts.cairo(),
         ),
       ),
     );

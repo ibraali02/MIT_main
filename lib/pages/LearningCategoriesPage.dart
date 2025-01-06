@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // For Cairo font
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
 import 'dart:math';
 import 'navigation_page.dart';
 
@@ -10,7 +12,21 @@ class TechCategoriesPage extends StatefulWidget {
 }
 
 class _TechCategoriesPageState extends State<TechCategoriesPage> {
-  int selectedIndex = -1; // المتغير لتخزين الدائرة المحددة
+  int selectedIndex = -1;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Function to store selected category in Firestore
+  void _storeSelectedCategory(String label) {
+    _firestore.collection('selectedCategories').add({
+      'category': label,
+      'timestamp': FieldValue.serverTimestamp(),
+    }).then((value) {
+      print('Category stored successfully');
+    }).catchError((error) {
+      print('Error storing category: $error');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,47 +35,54 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
         title: const Text(''), // إخفاء العنوان في الـ AppBar
       ),
       body: Container(
-        color: Colors.white, // خلفية الصفحة بيضاء
+        color: Colors.white,
         child: Stack(
           children: [
             // السؤال فوق الدوائر
             const Positioned(
-              top: 50, // المسافة من أعلى الصفحة
-              left: 10, // المسافة من اليسار
+              top: 50,
+              left: 10,
               child: Text(
-                'What do you want to learn?', // السؤال
+                'ماذا تريد أن تتعلم؟', // السؤال باللغة العربية
                 style: TextStyle(
-                  fontSize: 30, // تكبير حجم النص
-                  fontWeight: FontWeight.bold, // جعل الخط بولد
-                  color: Colors.black, // لون النص أسود
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
             ),
             // دائرة واحدة في المنتصف
-            _buildTechCircle('Center', 150, 300, 0), // مركز الدائرة
+            _buildTechCircle('البرمجة', 150, 300, 0),
             // توزيع الدوائر الأخرى حول المركز
             ...List.generate(6, (index) {
-              double angle = (2 * pi / 6) * index; // تحديد الزوايا لكل دائرة
-              double radius = 150; // نصف قطر الدائرة
-              double centerX = 155; // مركز الدائرة في X
-              double centerY = 300; // مركز الدائرة في Y
+              double angle = (2 * pi / 6) * index;
+              double radius = 150;
+              double centerX = 155;
+              double centerY = 300;
 
-              // حساب إحداثيات الدوائر بناءً على الزوايا والنصف القطر
               double x = centerX + radius * cos(angle);
               double y = centerY + radius * sin(angle);
 
-              // تسمية الدوائر
-              String label = 'Tech ${index + 1}';
+              // قائمة المجالات التقنية
+              List<String> categories = [
+                'الشبكات',
+                'الذكاء الاصطناعي',
+                'الحوسبة السحابية',
+                'الأمن السيبراني',
+                'تحليل البيانات',
+                'التعلم الآلي'
+              ];
 
-              return _buildTechCircle(label, x, y, index + 1); // بناء الدائرة
+              String label = categories[index]; // أخذ المجال من القائمة
+
+              return _buildTechCircle(label, x, y, index + 1);
             }),
-            // دائرة comntunuio في أسفل اليمين
+            // دائرة "استمرار" في أسفل اليمين
             Positioned(
-              bottom: 50, // المسافة من أسفل الصفحة
-              right: 10, // المسافة من اليمين
+              bottom: 50,
+              right: 10,
               child: GestureDetector(
                 onTap: () {
-                  // الانتقال إلى الصفحة الجديدة عند الضغط
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -72,12 +95,12 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
                   backgroundColor:
                   selectedIndex == 7 ? Colors.blue : Colors.orange,
                   child: const Text(
-                    'comntunuio',
+                    'استمرار',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // النص داخل الدائرة باللون الأبيض
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -90,7 +113,6 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
   }
 
   Widget _buildTechCircle(String label, double left, double top, int index) {
-    // تحديد اللون بناءً على إذا كانت الدائرة المحددة أم لا
     Color circleColor =
     (selectedIndex == index) ? Colors.blue : Colors.orange;
 
@@ -101,18 +123,19 @@ class _TechCategoriesPageState extends State<TechCategoriesPage> {
         onTap: () {
           setState(() {
             selectedIndex = (selectedIndex == index) ? -1 : index;
+            _storeSelectedCategory(label); // Store the selected category
           });
         },
         child: CircleAvatar(
           radius: 50,
-          backgroundColor: circleColor, // استخدام اللون المحدد
+          backgroundColor: circleColor,
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: GoogleFonts.cairo( // Use the Cairo font
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.white, // النص داخل الدائرة باللون الأبيض
+              color: Colors.white,
             ),
           ),
         ),

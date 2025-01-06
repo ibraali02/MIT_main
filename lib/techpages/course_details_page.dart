@@ -4,6 +4,7 @@ import 'courses/lectures_page.dart';
 import 'courses/videos_page.dart';
 import 'courses/ratings_page.dart';
 import 'courses/examspage.dart'; // Import the ExamsPage
+import 'package:google_fonts/google_fonts.dart';
 
 class CourseDetailsPage extends StatefulWidget {
   final String courseId;
@@ -47,7 +48,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage>
       appBar: AppBar(
         title: Text(
           widget.courseName,
-          style: const TextStyle(
+          style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
             fontSize: 24,
             color: Colors.white,
@@ -135,18 +136,18 @@ class CourseDetailsTab extends StatelessWidget {
           // Course Title
           Text(
             courseName,
-            style: const TextStyle(
+            style: GoogleFonts.cairo(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0096AB),
+              color: const Color(0xFF0096AB),
             ),
           ),
           const SizedBox(height: 8),
 
           // Teacher Name
           Text(
-            'Teacher: $teacher',
-            style: const TextStyle(
+            'المدرس: $teacher',
+            style: GoogleFonts.cairo(
               fontSize: 18,
               color: Colors.grey,
             ),
@@ -157,7 +158,7 @@ class CourseDetailsTab extends StatelessWidget {
           // Course Details
           Text(
             details,
-            style: const TextStyle(
+            style: GoogleFonts.cairo(
               fontSize: 16,
               color: Colors.black,
             ),
@@ -165,14 +166,7 @@ class CourseDetailsTab extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Course ID (Token)
-          Text(
-            'Course ID (Token): $courseId',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
-            ),
-          ),
+
         ],
       ),
     );

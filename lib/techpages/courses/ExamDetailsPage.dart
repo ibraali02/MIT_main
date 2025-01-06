@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ExamDetailsPage extends StatelessWidget {
   final String examId;
@@ -11,9 +12,12 @@ class ExamDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exam Details'),
-        backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
-        foregroundColor: Colors.white, // تغيير لون النص في الـ AppBar إلى اللون الأبيض
+        title: Text(
+          'تفاصيل الامتحان',
+          style: GoogleFonts.cairo(),
+        ),
+        backgroundColor: const Color(0xFF0096AB),
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
@@ -28,7 +32,7 @@ class ExamDetailsPage extends StatelessWidget {
           }
 
           if (!examSnapshot.hasData || !examSnapshot.data!.exists) {
-            return const Center(child: Text('No exam details found.'));
+            return const Center(child: Text('لم يتم العثور على تفاصيل الامتحان.'));
           }
 
           final examData = examSnapshot.data!;
@@ -40,28 +44,25 @@ class ExamDetailsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // عرض اسم الامتحان
                 Text(
-                  'Exam: $examName',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: const Color(0xFF0096AB), // اللون الأزرق للعناوين
+                  'الامتحان: $examName',
+                  style: GoogleFonts.cairo(
+                    color: const Color(0xFF0096AB),
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
                 ),
                 const SizedBox(height: 8),
-                // عرض مدة الامتحان
                 Text(
-                  'Duration: $examDuration minutes',
-                  style: TextStyle(
+                  'المدة: $examDuration دقيقة',
+                  style: GoogleFonts.cairo(
                     fontSize: 16,
-                    color: Colors.black87, // لون الخط الأسود
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
 
-                // عرض الأسئلة
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -77,7 +78,7 @@ class ExamDetailsPage extends StatelessWidget {
                       }
 
                       if (!questionsSnapshot.hasData || questionsSnapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text('No questions found.'));
+                        return const Center(child: Text('لا توجد أسئلة.'));
                       }
 
                       final questions = questionsSnapshot.data!.docs;
@@ -98,10 +99,10 @@ class ExamDetailsPage extends StatelessWidget {
                             child: ListTile(
                               title: Text(
                                 questionText,
-                                style: TextStyle(
+                                style: GoogleFonts.cairo(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: Colors.black87, // اللون الأسود للعناوين
+                                  color: Colors.black87,
                                 ),
                               ),
                               subtitle: Column(
@@ -111,9 +112,9 @@ class ExamDetailsPage extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(vertical: 4),
                                     child: Text(
                                       option['text'],
-                                      style: const TextStyle(
+                                      style: GoogleFonts.cairo(
                                         fontSize: 14,
-                                        color: Colors.black54, // لون خط الخيارات
+                                        color: Colors.black54,
                                       ),
                                     ),
                                   );
