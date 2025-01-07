@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_fonts/google_fonts.dart'; // استيراد مكتبة Google Fonts
-import 'course_details_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'course_registration_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,20 +33,19 @@ class _HomePageState extends State<HomePage> {
     _fetchStudentName();
   }
 
-  // Function to fetch student name using the token stored in SharedPreferences
   Future<void> _fetchStudentName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('user_document_id');
 
     if (token != null) {
       var studentDoc = await FirebaseFirestore.instance
-          .collection('students') // Assuming 'students' collection holds the student data
+          .collection('students')
           .doc(token)
           .get();
 
       if (studentDoc.exists) {
         setState(() {
-          studentName = studentDoc['fullName'] ?? "مجهول"; // Assuming the field is 'name'
+          studentName = studentDoc['fullName'] ?? "مجهول";
         });
       }
     }
@@ -57,7 +55,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar( automaticallyImplyLeading: false,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF0096AB),
         elevation: 1,
         centerTitle: true,
@@ -78,7 +77,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Directionality(  // تعيين اتجاه النص إلى RTL
+      body: Directionality(
         textDirection: TextDirection.rtl,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -173,10 +172,10 @@ class _HomePageState extends State<HomePage> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Display two items per row
-            crossAxisSpacing: 16, // Space between columns
-            mainAxisSpacing: 16, // Space between rows
-            childAspectRatio: 0.7, // Aspect ratio for the course cards
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.7,
           ),
           itemCount: courses.length,
           itemBuilder: (context, index) {
@@ -210,7 +209,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Custom function to fetch average rating from ratings sub-collection
   Future<double> _fetchAverageRating(String courseId) async {
     final ratingsSnapshot = await FirebaseFirestore.instance
         .collection('courses')
@@ -280,82 +278,85 @@ class _HomePageState extends State<HomePage> {
                 fit: BoxFit.cover,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.cairo(
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0096AB),
-                      ),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    details,
-                    style: GoogleFonts.cairo(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'المدرس: $teacher',
-                    style: GoogleFonts.cairo(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'الفئة: $category',
-                    style: GoogleFonts.cairo(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFFEFAC52),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  rating > 0
-                      ? Row(
-                    children: [
-                      _buildRatingStars(rating),
-                      const SizedBox(width: 8),
-                      Text(
-                        rating.toStringAsFixed(1),
-                        style: GoogleFonts.cairo(
-                          textStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.cairo(
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0096AB),
                         ),
                       ),
-                    ],
-                  )
-                      : const Text(
-                    'لا توجد تقييمات بعد',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      details,
+                      style: GoogleFonts.cairo(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'المدرس: $teacher',
+                      style: GoogleFonts.cairo(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'الفئة: $category',
+                      style: GoogleFonts.cairo(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFEFAC52),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    rating > 0
+                        ? Row(
+                      children: [
+                        _buildRatingStars(rating),
+                        const SizedBox(width: 8),
+                        Text(
+                          rating.toStringAsFixed(1),
+                          style: GoogleFonts.cairo(
+                            textStyle: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                        : const Text(
+                      'لا توجد تقييمات بعد',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -365,16 +366,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildRatingStars(double rating) {
+    int fullStars = rating.floor();
+    bool halfStar = (rating - fullStars) >= 0.5;
+
     List<Widget> stars = [];
-    for (int i = 1; i <= 5; i++) {
-      if (i <= rating) {
-        stars.add(const Icon(Icons.star, color: Colors.amber, size: 16));
-      } else {
-        stars.add(const Icon(Icons.star_border, color: Colors.amber, size: 16));
-      }
+    for (int i = 0; i < fullStars; i++) {
+      stars.add(const Icon(Icons.star, color: Colors.amber, size: 14));
     }
-    return Row(
-      children: stars,
-    );
+
+    if (halfStar) {
+      stars.add(const Icon(Icons.star_half, color: Colors.amber, size: 14));
+    }
+
+    while (stars.length < 5) {
+      stars.add(const Icon(Icons.star_border, color: Colors.grey, size: 14));
+    }
+
+    return Row(children: stars);
   }
 }
