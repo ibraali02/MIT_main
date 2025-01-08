@@ -6,6 +6,7 @@ import 'courses/lectures_page.dart';
 import 'courses/videos_page.dart';
 import 'courses/ratings_page.dart';
 import 'courses/examspage.dart'; // Import the ExamsPage
+import 'package:intl/intl.dart' as s;// Ensure the AddCoursePage is correctly imported
 
 class CourseDetailsPage extends StatefulWidget {
   final String courseId;
@@ -26,6 +27,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> with SingleTicker
   Future<Map<String, String>> fetchCourseDetails(String courseId) async {
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('courses').doc(courseId).get();
+      String createdAt = s.DateFormat('yyyy-MM-dd').format(snapshot['created_at'].toDate());
 
       if (snapshot.exists) {
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;

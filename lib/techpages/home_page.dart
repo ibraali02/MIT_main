@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'AddCoursePage.dart'; // Ensure the AddCoursePage is correctly imported
+import 'AddCoursePage.dart';
+import 'package:intl/intl.dart' as s;// Ensure the AddCoursePage is correctly imported
 import 'course_details_page.dart'; // Ensure the CourseDetailsPage is correctly imported
 
 class HomePage extends StatefulWidget {
@@ -200,9 +201,11 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 final avgRating = ratingSnapshot.data ?? 0.0;
+                String createdAt = s.DateFormat('yyyy-MM-dd').format(course['created_at'].toDate());
 
                 return _buildCourseCard(
-                  context,
+
+                  context,createdAt,
                   course['image_url'],
                   course['title'],
                   course['details'],
@@ -246,6 +249,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCourseCard(
       BuildContext context,
+     String createdAt,
       String imageUrl,
       String title,
       String details,
@@ -321,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         details,
                         style: const TextStyle(
@@ -332,7 +336,18 @@ class _HomePageState extends State<HomePage> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 1),
+                      Text(
+                        createdAt,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontFamily: 'Cairo',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
                       Text(
                         'المعلم: $teacher',
                         style: const TextStyle(
@@ -341,7 +356,7 @@ class _HomePageState extends State<HomePage> {
                           fontFamily: 'Cairo',
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 1),
                       Text(
                         'الفئة: $category',
                         style: const TextStyle(
@@ -350,7 +365,8 @@ class _HomePageState extends State<HomePage> {
                           fontFamily: 'Cairo',
                         ),
                       ),
-                      const SizedBox(height: 4),
+
+                      const SizedBox(height: 1),
                       rating > 0
                           ? Row(
                         children: [

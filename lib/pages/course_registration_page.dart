@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'course_details_page.dart';
+import 'package:intl/intl.dart' as s;// Ensure the AddCoursePage is correctly imported
 
 class CourseRegistrationPage extends StatelessWidget {
   final String courseId;
@@ -146,6 +147,7 @@ class CourseRegistrationPage extends StatelessWidget {
             }
 
             var courseData = snapshot.data!.data() as Map<String, dynamic>;
+            String createdAt = s.DateFormat('yyyy-MM-dd').format(courseData['created_at'].toDate());
 
             String title = courseData['title'] ?? '';
             String details = courseData['details'] ?? '';
@@ -210,6 +212,7 @@ class CourseRegistrationPage extends StatelessWidget {
                               fontFamily: 'Cairo',
                             ),
                           ),
+
                           const SizedBox(height: 8),
                           Text(
                             details,
@@ -222,7 +225,7 @@ class CourseRegistrationPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'تاريخ البدء: $startDate',
+                            'تاريخ النشر: $createdAt',
                             style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Cairo'),
                           ),
                           const SizedBox(height: 12),

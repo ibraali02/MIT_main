@@ -42,7 +42,7 @@ class RoleSelectionPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SplashScreen()),
+                    MaterialPageRoute(builder: (context) => const SplashScreen(isTeacher: false,)),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -67,7 +67,7 @@ class RoleSelectionPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SplashScreen()),
+                    MaterialPageRoute(builder: (context) => const SplashScreen(isTeacher: true,)),
                   );
                 },
                 style: ElevatedButton.styleFrom(

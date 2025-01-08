@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'course_registration_page.dart';
+import 'package:intl/intl.dart' as s;// Ensure the AddCoursePage is correctly imported
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -190,9 +191,10 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 final avgRating = ratingSnapshot.data ?? 0.0;
+                String createdAt = s.DateFormat('yyyy-MM-dd').format(course['created_at'].toDate());
 
                 return _buildCourseCard(
-                  context,
+                  context,createdAt,
                   course['image_url'],
                   course['title'],
                   course['details'],
@@ -235,6 +237,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCourseCard(
       BuildContext context,
+      String createdAt,
       String imageUrl,
       String title,
       String details,
@@ -297,9 +300,21 @@ class _HomePageState extends State<HomePage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 1),
                     Text(
                       details,
+                      style: GoogleFonts.cairo(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      createdAt,
                       style: GoogleFonts.cairo(
                         textStyle: const TextStyle(
                           fontSize: 12,
@@ -319,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 1),
                     Text(
                       'الفئة: $category',
                       style: GoogleFonts.cairo(
@@ -329,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 1),
                     rating > 0
                         ? Row(
                       children: [

@@ -6,7 +6,9 @@ import 'package:graduation/techpages/navigation_page.dart' as tech_navigation;
 import 'package:graduation/pages/navigation_page.dart' as user_navigation;
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool isTeacher; // إضافة معامل لاستقبال القيمة
+
+  const SplashScreen({super.key, required this.isTeacher}); // تعديل البناء لاستقبال القيمة
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -22,41 +24,44 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
 
-    if (prefs.containsKey('token')) {
-      // If 'token' exists, check if it exists in the 'users' collection in Firestore
-      String token = prefs.getString('token')!;
-      bool tokenExists = await _checkTokenInFirestore(token);
+    if (widget.isTeacher) {
+      // إذا كانت القيمة true، تحقق من التوكن
+      if (prefs.containsKey('token')) {
+        String token = prefs.getString('token')!;
+        bool tokenExists = await _checkTokenInFirestore(token);
 
-      if (tokenExists) {
-        // Token is valid, navigate to tech navigation
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const tech_navigation.NavigationPage()),
-        );
-      } else {
-        _navigateToFirstOpen();
-      }
-    } else if (prefs.containsKey('user_document_id')) {
-      // If 'user_document_id' exists, check if it exists in the 'students' collection in Firestore
-      String userDocumentId = prefs.getString('user_document_id')!;
-      bool userDocumentExists = await _checkUserDocumentInFirestore(userDocumentId);
-
-      if (userDocumentExists) {
-        // User document ID is valid, navigate to user navigation
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const user_navigation.NavigationPage()),
-        );
+        if (tokenExists) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const tech_navigation.NavigationPage()),
+          );
+        } else {
+          _navigateToFirstOpen();
+        }
       } else {
         _navigateToFirstOpen();
       }
     } else {
-      // If neither 'token' nor 'user_document_id' exists
-      _navigateToFirstOpen();
+      // إذا كانت القيمة false، تحقق من user_document_id
+      if (prefs.containsKey('user_document_id')) {
+        String userDocumentId = prefs.getString('user_document_id')!;
+        bool userDocumentExists = await _checkUserDocumentInFirestore(userDocumentId);
+
+        if (userDocumentExists) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const user_navigation.NavigationPage()),
+          );
+        } else {
+          _navigateToFirstOpen();
+        }
+      } else {
+        _navigateToFirstOpen();
+      }
     }
   }
 
   Future<bool> _checkTokenInFirestore(String token) async {
     try {
-      var snapshot = await FirebaseFirestore.instance.collection('users').doc(token).get();
+      var snapshot = await FirebaseFirestore.instance.collection('teacher_requests').doc(token).get();
       return snapshot.exists;
     } catch (e) {
       return false;

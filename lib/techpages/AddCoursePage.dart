@@ -19,7 +19,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
   final _teacherNameController = TextEditingController();
   XFile? _selectedImage;
   bool _loading = false;
-  String _selectedCategory = 'التكنولوجيا';  // default category in Arabic
+  String _selectedCategory = 'التكنولوجيا'; // default category in Arabic
 
   // List of categories in Arabic for the DropdownButton
   final List<String> categories = [
@@ -102,13 +102,14 @@ class _AddCoursePageState extends State<AddCoursePage> {
         throw Exception('فشل تحميل الصورة.');
       }
 
+      // Store the course data along with the current timestamp
       await FirebaseFirestore.instance.collection('courses').add({
         'title': title,
         'details': details,
         'category': category,
         'teacher': teacher,
         'image_url': imageUrl,
-        'created_at': Timestamp.now(),
+        'created_at': Timestamp.now(), // تخزين وقت النشر
         'token': token,
         'isCompleted': false,
       });
@@ -183,7 +184,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 3,
                       blurRadius: 5,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
