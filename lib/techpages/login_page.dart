@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../PasswordRecoveryPage.dart';
 import '../techpages/navigation_page.dart';
 import 'SignUpDialogPage.dart';
 
@@ -159,6 +160,22 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       'تسجيل الدخول',
                       style: GoogleFonts.cairo(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to PasswordRecoveryPage when the user clicks "Forgot Password"
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PasswordRecoveryPage()),
+                      );
+                    },
+                    child: Text(
+                      'نسيت كلمة المرور؟',
+                      style: GoogleFonts.cairo(
+                        color: const Color(0xFF1C9AAA),
+                      ),
                     ),
                   ),
                 ],

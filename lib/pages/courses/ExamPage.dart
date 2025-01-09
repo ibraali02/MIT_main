@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ExamPage extends StatefulWidget {
   final String courseId;
@@ -20,7 +21,7 @@ class _ExamPageState extends State<ExamPage> {
   int remainingTime = 0;
   late int initialTime;
   late Duration timerDuration;
-  String studentName = '';
+  String studentFirstName = '';
   bool hasEnteredName = false;
 
   @override
@@ -50,27 +51,16 @@ class _ExamPageState extends State<ExamPage> {
             .collection('questions')
             .get();
 
-        List<Map<String, dynamic>> loadedQuestions = [];
-
-        for (var questionDoc in questionsSnapshot.docs) {
+        List<Map<String, dynamic>> loadedQuestions = questionsSnapshot.docs.map((questionDoc) {
           var questionData = questionDoc.data();
-          var question = {
+          return {
             'question': questionData['question'],
             'type': questionData['type'],
-            'options': [],
-            'correctAnswer': questionData['correctAnswers'],
+            'options': questionData['options'],
+            'correctAnswer': questionData['correctAnswer'],
+            'correctAnswers': questionData['correctAnswers'],
           };
-
-          var optionsSnapshot = questionData['options'];
-          for (var optionData in optionsSnapshot) {
-            question['options'].add({
-              'text': optionData['text'],
-              'isCorrect': optionData['isCorrect'],
-            });
-          }
-
-          loadedQuestions.add(question);
-        }
+        }).toList();
 
         setState(() {
           questions = loadedQuestions;
@@ -120,8 +110,15 @@ class _ExamPageState extends State<ExamPage> {
   void _calculateScore() {
     int correctAnswers = 0;
     for (int i = 0; i < questions.length; i++) {
-      if (answers[i] == questions[i]['correctAnswer'][0]) {
-        correctAnswers++;
+      if (questions[i]['type'] == 'True/False') {
+        if (answers[i] != null && answers[i] == questions[i]['correctAnswer']) {
+          correctAnswers++;
+        }
+      } else {
+        if (answers[i] != null &&
+            questions[i]['correctAnswers'].contains(answers[i])) {
+          correctAnswers++;
+        }
       }
     }
     setState(() {
@@ -129,52 +126,13 @@ class _ExamPageState extends State<ExamPage> {
     });
   }
 
-  void _submitExam() async {
-    try {
-      List<Map<String, dynamic>> studentAnswers = [];
-      for (int i = 0; i < answers.length; i++) {
-        studentAnswers.add({
-          'questionNumber': i + 1,
-          'answer': answers[i],
-        });
-      }
-
-      var studentData = {
-        'studentName': studentName,
-        'answers': studentAnswers,
-        'score': score,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection('courses')
-          .doc(widget.courseId)
-          .collection('exams')
-          .doc(widget.examId)
-          .collection('student_answers')
-          .add(studentData);
-
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال الامتحان بنجاح!')));
-    } catch (e) {
-      print('Error saving student answers: $e');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء إرسال الامتحان.')));
-    }
-  }
-
-  void _enterName(String name) {
-    setState(() {
-      studentName = name;
-      hasEnteredName = true;
-    });
-    _loadQuestions();
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!hasEnteredName) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('أدخل اسمك'),
+          title: Text('أدخل اسمك', style: GoogleFonts.cairo()), // تغيير الخط
+          backgroundColor: Color(0xFF0096AB),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -182,22 +140,58 @@ class _ExamPageState extends State<ExamPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'الرجاء إدخال اسمك لبدء الامتحان:',
-                style: TextStyle(fontSize: 18),
+                style: GoogleFonts.cairo(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0096AB),
+                ),
               ),
+              const SizedBox(height: 16),
               TextField(
                 onChanged: (value) {
                   setState(() {
-                    studentName = value;
+                    studentFirstName = value;
                   });
                 },
-                decoration: const InputDecoration(hintText: 'أدخل اسمك'),
+                decoration: InputDecoration(
+                  hintText: 'أدخل اسمك',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Color(0xFF0096AB)),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  filled: true,
+                  fillColor: Colors.blue[50],
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: studentName.isNotEmpty ? () => _enterName(studentName) : null,
-                child: const Text('ابدأ الامتحان'),
+                onPressed: studentFirstName.isNotEmpty
+                    ? () {
+                  setState(() {
+                    hasEnteredName = true;
+                  });
+                  _loadQuestions();
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0096AB),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  elevation: 5,
+                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
+                ),
+                child: Text(
+                  'ابدأ الامتحان',
+                  style: GoogleFonts.cairo(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ],
           ),
@@ -209,14 +203,116 @@ class _ExamPageState extends State<ExamPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (isFinished) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('النتيجة', style: GoogleFonts.cairo()), // تغيير الخط
+          backgroundColor: Color(0xFF0096AB),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'نتيجتك: $score / ${questions.length}',
+                style: GoogleFonts.cairo(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: questions.length,
+                  itemBuilder: (context, index) {
+                    final question = questions[index]['question'];
+                    final correctAnswer = questions[index]['type'] == 'True/False'
+                        ? questions[index]['correctAnswer']
+                        : questions[index]['correctAnswers'].join(', ');
+                    final userAnswer = answers[index] ?? 'لم يتم الإجابة';
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      color: Colors.blue[50],
+                      elevation: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'السؤال ${index + 1}: $question',
+                              style: GoogleFonts.cairo(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0096AB),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'الإجابة الصحيحة: $correctAnswer',
+                              style: GoogleFonts.cairo(
+                                fontSize: 14,
+                                color: Colors.green,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'إجابتك: $userAnswer',
+                              style: GoogleFonts.cairo(
+                                fontSize: 14,
+                                color: userAnswer == correctAnswer
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0096AB),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  elevation: 5,
+                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
+                ),
+                child: Text(
+                  'العودة إلى الصفحة الرئيسية',
+                  style: GoogleFonts.cairo(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final currentQuestion = questions[currentQuestionIndex];
     final questionText = currentQuestion['question'] ?? '';
     final questionType = currentQuestion['type'] ?? '';
-    final correctAnswers = currentQuestion['correctAnswer'];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('الامتحان - $studentName'),
+        title: Text('الامتحان - $studentFirstName', style: GoogleFonts.cairo()), // تغيير الخط
+        backgroundColor: Color(0xFF0096AB),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -225,87 +321,92 @@ class _ExamPageState extends State<ExamPage> {
           children: [
             Text(
               'الوقت المتبقي: ${timerDuration.inMinutes}:${(timerDuration.inSeconds % 60).toString().padLeft(2, '0')}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+              style: GoogleFonts.cairo(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'السؤال ${currentQuestionIndex + 1}: $questionText',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.cairo(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0096AB),
+              ),
             ),
             const SizedBox(height: 16),
             if (questionType == 'Multiple Choice') ...[
               ...currentQuestion['options'].map<Widget>((option) {
                 return RadioListTile<String>(
-                  title: Text(option['text']),
+                  title: Text(option['text'], style: GoogleFonts.cairo()),
                   value: option['text'],
                   groupValue: answers[currentQuestionIndex],
                   onChanged: (String? value) {
                     _onAnswerSelected(value!);
                   },
+                  activeColor: Color(0xFF0096AB),
+                  tileColor: Colors.blue[50],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 );
               }).toList(),
             ] else if (questionType == 'True/False') ...[
-              const Text('اختر الإجابة الصحيحة:'),
               RadioListTile<String>(
-                title: const Text('صحيح'),
+                title: Text('صحيح', style: GoogleFonts.cairo()),
                 value: 'True',
                 groupValue: answers[currentQuestionIndex],
                 onChanged: (String? value) {
                   _onAnswerSelected(value!);
                 },
+                activeColor: Color(0xFF0096AB),
+                tileColor: Colors.blue[50],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
               RadioListTile<String>(
-                title: const Text('خطأ'),
+                title: Text('خطأ', style: GoogleFonts.cairo()),
                 value: 'False',
                 groupValue: answers[currentQuestionIndex],
                 onChanged: (String? value) {
                   _onAnswerSelected(value!);
                 },
+                activeColor: Color(0xFF0096AB),
+                tileColor: Colors.blue[50],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
             ],
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: isFinished ? _submitExam : _nextQuestion,
-              child: Text(isFinished ? 'تقديم الامتحان' : 'التالي'),
-            ),
-            if (isFinished)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'نتيجتك: $score / ${questions.length}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'راجع إجاباتك:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    ...List.generate(questions.length, (index) {
-                      final question = questions[index];
-                      final userAnswer = answers[index];
-                      final correctAnswer = question['correctAnswer'][0];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'سؤال ${index + 1}: ${question['question']}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text('إجابتك: $userAnswer'),
-                            Text('الإجابة الصحيحة: $correctAnswer'),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
+              onPressed: currentQuestionIndex == questions.length - 1
+                  ? () {
+                setState(() {
+                  isFinished = true;
+                  _calculateScore();
+                });
+              }
+                  : _nextQuestion,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF0096AB),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                elevation: 5,
+                shadowColor: Color(0xFF0096AB).withOpacity(0.3),
               ),
+              child: Text(
+                currentQuestionIndex == questions.length - 1
+                    ? 'عرض النتيجة'
+                    : 'التالي',
+                style: GoogleFonts.cairo(color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),

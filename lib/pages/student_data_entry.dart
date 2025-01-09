@@ -123,7 +123,7 @@ class _StudentDataEntryState extends State<StudentDataEntry> {
                 const SizedBox(height: 20),
                 _buildTextField(_phoneController, 'رقم الهاتف'),
                 const SizedBox(height: 20),
-                _buildTextField(_registrationNumberController, 'رقم التسجيل'),
+                _buildTextField(_registrationNumberController, 'رقم القيد'),
                 const SizedBox(height: 20),
                 _buildDropdownField('المدينة', ['مصراتة', 'بنغازي', 'طرابلس'], (value) {
                   setState(() {

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';  // For Clipboard functionality
 
 class UserListPage extends StatefulWidget {
   const UserListPage({super.key});
@@ -13,11 +14,16 @@ class UserListPage extends StatefulWidget {
 class _UserListPageState extends State<UserListPage> {
   String filterType = 'all';
 
-  Future<void> _acceptUser(BuildContext context, String userId) async {
+  Future<void> _acceptUser(BuildContext context, String userId, String email, String password) async {
     try {
+      // Accept the user
       await FirebaseFirestore.instance.collection('teacher_requests').doc(userId).update({
         'accepted': true,
       });
+
+      // Copy the email and password to clipboard
+      await Clipboard.setData(ClipboardData(text: '$email\n$password'));
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تم قبول المستخدم بنجاح')),
       );
@@ -67,6 +73,64 @@ class _UserListPageState extends State<UserListPage> {
     }
   }
 
+  // Function to delete a password recovery request
+  Future<void> _deletePasswordRecoveryRequest(BuildContext context, String requestId) async {
+    try {
+      await FirebaseFirestore.instance.collection('password_recovery_requests').doc(requestId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم حذف طلب استعادة كلمة المرور بنجاح')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ في حذف الطلب: $e')),
+      );
+    }
+  }
+
+  // Function to copy email to clipboard
+  Future<void> _copyEmailToClipboard(String email) async {
+    await Clipboard.setData(ClipboardData(text: email));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('تم نسخ البريد الإلكتروني إلى الحافظة')),
+    );
+  }
+
+  // Function to show accept dialog
+  Future<void> _showAcceptDialog(BuildContext context, var user) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('موافقة على المستخدم', style: GoogleFonts.cairo()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'هل ترغب في قبول المستخدم ${user['fullName']}؟\nالبريد الإلكتروني: ${user['email']}\nالرمز: ${user['password']}',
+                style: GoogleFonts.cairo(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await _acceptUser(context, user.id, user['email'], user['password']);
+                Navigator.pop(context);
+              },
+              child: Text('قبول', style: GoogleFonts.cairo()),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('إلغاء', style: GoogleFonts.cairo()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,6 +164,8 @@ class _UserListPageState extends State<UserListPage> {
                   _buildFilterButton('جميع الطلبات', 'all'),
                   const SizedBox(width: 10),
                   _buildFilterButton('الطلاب', 'students'),
+                  const SizedBox(width: 10),
+                  _buildFilterButton('طلبات نسيان الرمز', 'password_recovery_requests'),
                 ],
               ),
             ),
@@ -109,6 +175,8 @@ class _UserListPageState extends State<UserListPage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: filterType == 'students'
                   ? FirebaseFirestore.instance.collection('students').snapshots()
+                  : filterType == 'password_recovery_requests'
+                  ? FirebaseFirestore.instance.collection('password_recovery_requests').snapshots()
                   : FirebaseFirestore.instance
                   .collection('teacher_requests')
                   .where('accepted', isEqualTo: filterType == 'all' ? null : filterType == 'accepted')
@@ -121,6 +189,8 @@ class _UserListPageState extends State<UserListPage> {
                 var data = snapshot.data!.docs;
                 if (filterType == 'students') {
                   return _buildStudentList(data);
+                } else if (filterType == 'password_recovery_requests') {
+                  return _buildPasswordRecoveryList(data);
                 } else {
                   return _buildUserList(data);
                 }
@@ -204,7 +274,7 @@ class _UserListPageState extends State<UserListPage> {
               style: GoogleFonts.cairo(),
             ),
             subtitle: Text(
-              'البريد الإلكتروني: ${user['email']}',
+              'البريد الإلكتروني: ${user['email']}\nالكلية: ${user['college']}\nالشهادة: ${user['degree']}\nرقم الهاتف: ${user['phone']}\nالرمز: ${user['password']}',
               style: GoogleFonts.cairo(),
             ),
             trailing: Row(
@@ -214,7 +284,7 @@ class _UserListPageState extends State<UserListPage> {
                   IconButton(
                     icon: const Icon(Icons.check, color: Colors.green),
                     onPressed: () async {
-                      await _acceptUser(context, user.id);
+                      await _showAcceptDialog(context, user);
                     },
                   ),
                 IconButton(
@@ -223,20 +293,49 @@ class _UserListPageState extends State<UserListPage> {
                     await _rejectUser(context, user.id);
                   },
                 ),
-                if (filterType == 'pending') // Show PDF button for pending requests
-                  IconButton(
-                    icon: const Icon(Icons.picture_as_pdf, color: Colors.blue),
-                    onPressed: () async {
-                      String pdfUrl = user['cvUrl'] ?? ''; // Assume the PDF URL is stored in the 'pdfUrl' field
-                      if (pdfUrl.isNotEmpty) {
-                        await _openPDF(pdfUrl);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('رابط PDF غير موجود لهذا المستخدم')),
-                        );
-                      }
-                    },
-                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPasswordRecoveryList(List<DocumentSnapshot> data) {
+    return ListView.builder(
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        var user = data[index];
+        return Card(
+          margin: const EdgeInsets.all(8.0),
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ListTile(
+            title: Text(
+              user['full_name'],
+              style: GoogleFonts.cairo(),
+            ),
+            subtitle: Text(
+              'البريد الإلكتروني: ${user['email']}\nرقم الهاتف: ${user['phone']}\nالمدينة: ${user['city']}\nالجنس: ${user['gender']}\nرقم التسجيل: ${user['registration_number']}',
+              style: GoogleFonts.cairo(),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.copy, color: Colors.blue),
+                  onPressed: () {
+                    _copyEmailToClipboard(user['email']);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () async {
+                    await _deletePasswordRecoveryRequest(context, user.id);
+                  },
+                ),
               ],
             ),
           ),

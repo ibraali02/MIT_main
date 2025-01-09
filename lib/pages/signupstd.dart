@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../PasswordRecoveryPage.dart';
 import 'navigation_page.dart';
 import 'student_data_entry.dart';
 
@@ -74,15 +75,16 @@ class _SignUpStdState extends State<SignUpStd> {
             // Header with reduced AppBar size
             PreferredSize(
               preferredSize: const Size.fromHeight(100), // Set the height of the AppBar
-              child: AppBar(automaticallyImplyLeading: false,
+              child: AppBar(
+                automaticallyImplyLeading: false,
                 backgroundColor: const Color(0xFF1C9AAA),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(30.0),
                     bottomRight: Radius.circular(30.0),
                   ),
-                ),                centerTitle: true,
-
+                ),
+                centerTitle: true,
                 title: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: Text(
@@ -107,7 +109,7 @@ class _SignUpStdState extends State<SignUpStd> {
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Image.asset(
                         'lib/images/mit.png',
-                        height: 300, // ضبط الارتفاع المطلوب للشعار
+                        height: 300, // Adjust the height for the logo
                       ),
                     ),
                     // Email input field
@@ -162,6 +164,20 @@ class _SignUpStdState extends State<SignUpStd> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const PasswordRecoveryPage()),
+                        );
+                      },
+                      child: Text(
+                        'نسيت كلمة المرور؟',
+                        style: GoogleFonts.cairo(
+                          fontSize: 16,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
                     // Sign up link
                     TextButton(
                       onPressed: () {
@@ -177,6 +193,8 @@ class _SignUpStdState extends State<SignUpStd> {
                         ),
                       ),
                     ),
+                    // Forgot password link
+
                   ],
                 ),
               ),

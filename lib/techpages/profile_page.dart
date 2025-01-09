@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:graduation/techpages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,7 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _collegeController;
   late TextEditingController _degreeController;
 
-  bool _isPasswordVisible = false;
+  bool _isPasswordVisible = false; // للتحكم في إظهار/إخفاء كلمة المرور
 
   Future<Map<String, dynamic>>? _userDataFuture;
 
@@ -57,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
         .collection('teacher_requests')
-        .doc(userToken)
+        .doc(userToken) // استخدام معرّف المستخدم لجلب بيانات الطلب
         .get();
 
     if (!userSnapshot.exists) {
@@ -66,27 +65,46 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final userData = userSnapshot.data();
 
-    _fullNameController.text = userData?['fullName'] ?? 'غير معروف';
-    _emailController.text = userData?['email'] ?? 'لا يوجد بريد إلكتروني';
-    _phoneController.text = userData?['phone'] ?? 'لا يوجد رقم هاتف';
-    _collegeController.text = userData?['college'] ?? 'غير معروف';
-    _degreeController.text = userData?['degree'] ?? 'غير معروف';
+    _fullNameController.text = userData?['fullName'] ?? 'Unknown';
+    _emailController.text = userData?['email'] ?? 'No Email';
+    _phoneController.text = userData?['phone'] ?? 'No Phone';
+    _collegeController.text = userData?['college'] ?? 'Unknown';
+    _degreeController.text = userData?['degree'] ?? 'Unknown';
 
     return userData ?? {};
   }
 
   void _saveChanges() {
+    // منطق لحفظ التعديلات، مثل تحديث قاعدة البيانات أو SharedPreferences
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم حفظ التغييرات بنجاح!')),
+      const SnackBar(content: Text('Changes saved successfully!')),
     );
   }
 
   Future<void> _logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    await prefs.remove('token');  // حذف التوكن المخزن
+    // فتح صفحة تسجيل الدخول
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
-          (Route<dynamic> route) => false,
+      MaterialPageRoute(builder: (context) => LoginPage()), // تأكد من استبدال LoginPage باسم الصفحتك الفعلي
+          (Route<dynamic> route) => false, // حذف جميع الصفحات السابقة من المكدس
+    );
+  }
+
+  void _contactUs() {
+    // منطق فتح صفحة الاتصال، يمكن تنفيذ صفحة جديدة أو عرض معلومات الاتصال
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Contact Us'),
+        content: const Text('For inquiries, please contact us at: support@example.com'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -96,7 +114,6 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70.0),
         child: AppBar(
-          automaticallyImplyLeading: false,
           backgroundColor: const Color(0xFF0096AB),
           elevation: 4.0,
           shape: const RoundedRectangleBorder(
@@ -106,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           title: const Text(
-            'الملف الشخصي',
+            'Profile',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -117,145 +134,153 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: _userDataFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _userDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'خطأ: ${snapshot.error}',
-                      style: TextStyle(color: Color(0xFF0096AB)),
-                    ),
-                  );
-                }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}', style: TextStyle(color: Color(0xFF0096AB))),
+            );
+          }
 
-                final userData = snapshot.data;
+          final userData = snapshot.data;
 
-                if (userData == null) {
-                  return const Center(
-                    child: Text('لا توجد بيانات للمستخدم.'),
-                  );
-                }
+          if (userData == null) {
+            return const Center(
+              child: Text('No user data found.'),
+            );
+          }
 
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ListView(
-                    children: [
-                      _buildProfileCard(
-                        icon: Icons.person,
-                        title: 'الاسم الكامل',
-                        child: TextField(
-                          controller: _fullNameController,
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل اسمك الكامل',
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                      _buildProfileCard(
-                        icon: Icons.email,
-                        title: 'البريد الإلكتروني',
-                        child: TextField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل بريدك الإلكتروني',
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                      _buildProfileCard(
-                        icon: Icons.phone,
-                        title: 'الهاتف',
-                        child: TextField(
-                          controller: _phoneController,
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل رقم هاتفك',
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                      _buildProfileCard(
-                        icon: Icons.lock,
-                        title: 'كلمة المرور',
-                        child: TextField(
-                          controller: _passwordController,
-                          obscureText: !_isPasswordVisible,
-                          decoration: InputDecoration(
-                            hintText: 'أدخل كلمة المرور',
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                                color: Color(0xFF0096AB),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
-                              },
-                            ),
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                      _buildProfileCard(
-                        icon: Icons.school,
-                        title: 'الكلية',
-                        child: TextField(
-                          controller: _collegeController,
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل اسم الكلية',
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                      _buildProfileCard(
-                        icon: Icons.grade,
-                        title: 'الدرجة',
-                        child: TextField(
-                          controller: _degreeController,
-                          decoration: const InputDecoration(
-                            hintText: 'أدخل درجتك',
-                          ),
-                          style: GoogleFonts.cairo(),
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
+          return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            child: ListView(
+              children: [
+                _buildProfileCard(
+                  icon: Icons.person,
+                  title: 'Full Name',
+                  child: TextField(
+                    controller: _fullNameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your full name',
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'تسجيل الخروج',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
+                _buildProfileCard(
+                  icon: Icons.email,
+                  title: 'Email',
+                  child: TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your email',
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.phone,
+                  title: 'Phone',
+                  child: TextField(
+                    controller: _phoneController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your phone number',
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.lock,
+                  title: 'Password',
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      hintText: 'Enter New password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                          color: Color(0xFF0096AB),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.school,
+                  title: 'College',
+                  child: TextField(
+                    controller: _collegeController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your college',
+                    ),
+                  ),
+                ),
+                _buildProfileCard(
+                  icon: Icons.grade,
+                  title: 'Degree',
+                  child: TextField(
+                    controller: _degreeController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your degree',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEFAC52),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save Changes',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _contactUs,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0096AB),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Contact Us',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
