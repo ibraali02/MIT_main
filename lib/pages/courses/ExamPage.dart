@@ -54,6 +54,7 @@ class _ExamPageState extends State<ExamPage> {
         List<Map<String, dynamic>> loadedQuestions = questionsSnapshot.docs.map((questionDoc) {
           var questionData = questionDoc.data();
           return {
+            'id': questionDoc.id, // Store the document ID
             'question': questionData['question'],
             'type': questionData['type'],
             'options': questionData['type'] == 'True/False' ? [] : questionData['options'],
@@ -106,8 +107,9 @@ class _ExamPageState extends State<ExamPage> {
     }
   }
 
-  void _calculateScore() {
+  void _calculateScore() async {
     int correctAnswers = 0;
+
     for (int i = 0; i < questions.length; i++) {
       if (questions[i]['type'] == 'True/False') {
         if (answers[i] != null && answers[i] == questions[i]['correctAnswer']) {
@@ -115,14 +117,33 @@ class _ExamPageState extends State<ExamPage> {
         }
       } else {
         if (answers[i] != null &&
-            questions[i]['correctAnswers'].contains(answers[i])) {
+            questions[i]['correctAnswer'].contains(answers[i])) {
           correctAnswers++;
         }
       }
     }
+
     setState(() {
       score = correctAnswers;
     });
+
+    // Save answers in Firestore
+    for (int i = 0; i < questions.length; i++) {
+      await FirebaseFirestore.instance
+          .collection('courses')
+          .doc(widget.courseId)
+          .collection('exams')
+          .doc(widget.examId)
+          .collection('questions')
+          .doc(questions[i]['id']) // Use the unique question ID
+          .collection('answers') // Create a subcollection for answers
+          .add({
+        'studentName': studentFirstName,
+        'questionNumber': i + 1,
+        'studentAnswer': answers[i],
+        'correctAnswer': questions[i]['correctAnswer'],
+      });
+    }
   }
 
   @override
@@ -130,8 +151,8 @@ class _ExamPageState extends State<ExamPage> {
     if (!hasEnteredName) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('أدخل اسمك', style: GoogleFonts.cairo()), // تغيير الخط
-          backgroundColor: Color(0xFF0096AB),
+          title: Text('أدخل اسمك', style: GoogleFonts.cairo()),
+          backgroundColor: const Color(0xFF0096AB),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -144,7 +165,7 @@ class _ExamPageState extends State<ExamPage> {
                 style: GoogleFonts.cairo(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0096AB),
+                  color: const Color(0xFF0096AB),
                 ),
               ),
               const SizedBox(height: 16),
@@ -158,9 +179,9 @@ class _ExamPageState extends State<ExamPage> {
                   hintText: 'أدخل اسمك',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(color: Color(0xFF0096AB)),
+                    borderSide: const BorderSide(color: Color(0xFF0096AB)),
                   ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   filled: true,
                   fillColor: Colors.blue[50],
                 ),
@@ -176,13 +197,13 @@ class _ExamPageState extends State<ExamPage> {
                 }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0096AB),
+                  backgroundColor: const Color(0xFF0096AB),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   elevation: 5,
-                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
+                  shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
                 ),
                 child: Text(
                   'ابدأ الامتحان',
@@ -205,8 +226,8 @@ class _ExamPageState extends State<ExamPage> {
     if (isFinished) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('النتيجة', style: GoogleFonts.cairo()), // تغيير الخط
-          backgroundColor: Color(0xFF0096AB),
+          title: Text('النتيجة', style: GoogleFonts.cairo()),
+          backgroundColor: const Color(0xFF0096AB),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -229,7 +250,7 @@ class _ExamPageState extends State<ExamPage> {
                     final question = questions[index]['question'];
                     final correctAnswer = questions[index]['type'] == 'True/False'
                         ? questions[index]['correctAnswer']
-                        : questions[index]['correctAnswers'].join(', ');
+                        : questions[index]['correctAnswer'].join(', ');
                     final userAnswer = answers[index] ?? 'لم يتم الإجابة';
 
                     return Card(
@@ -249,7 +270,7 @@ class _ExamPageState extends State<ExamPage> {
                               style: GoogleFonts.cairo(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0096AB),
+                                color: const Color(0xFF0096AB),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -282,13 +303,13 @@ class _ExamPageState extends State<ExamPage> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0096AB),
+                  backgroundColor: const Color(0xFF0096AB),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   elevation: 5,
-                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
+                  shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
                 ),
                 child: Text(
                   'العودة إلى الصفحة الرئيسية',
@@ -310,8 +331,8 @@ class _ExamPageState extends State<ExamPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('الامتحان - $studentFirstName', style: GoogleFonts.cairo()), // تغيير الخط
-        backgroundColor: Color(0xFF0096AB),
+        title: Text('الامتحان - $studentFirstName', style: GoogleFonts.cairo()),
+        backgroundColor: const Color(0xFF0096AB),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -332,7 +353,7 @@ class _ExamPageState extends State<ExamPage> {
               style: GoogleFonts.cairo(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0096AB),
+                color: const Color(0xFF0096AB),
               ),
             ),
             const SizedBox(height: 16),
@@ -345,7 +366,7 @@ class _ExamPageState extends State<ExamPage> {
                   onChanged: (String? value) {
                     _onAnswerSelected(value!);
                   },
-                  activeColor: Color(0xFF0096AB),
+                  activeColor: const Color(0xFF0096AB),
                   tileColor: Colors.blue[50],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -360,7 +381,7 @@ class _ExamPageState extends State<ExamPage> {
                 onChanged: (String? value) {
                   _onAnswerSelected(value!);
                 },
-                activeColor: Color(0xFF0096AB),
+                activeColor: const Color(0xFF0096AB),
                 tileColor: Colors.blue[50],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -373,7 +394,7 @@ class _ExamPageState extends State<ExamPage> {
                 onChanged: (String? value) {
                   _onAnswerSelected(value!);
                 },
-                activeColor: Color(0xFF0096AB),
+                activeColor: const Color(0xFF0096AB),
                 tileColor: Colors.blue[50],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -391,13 +412,13 @@ class _ExamPageState extends State<ExamPage> {
               }
                   : _nextQuestion,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0096AB),
+                backgroundColor: const Color(0xFF0096AB),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 elevation: 5,
-                shadowColor: Color(0xFF0096AB).withOpacity(0.3),
+                shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
               ),
               child: Text(
                 currentQuestionIndex == questions.length - 1
