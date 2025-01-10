@@ -56,9 +56,8 @@ class _ExamPageState extends State<ExamPage> {
           return {
             'question': questionData['question'],
             'type': questionData['type'],
-            'options': questionData['options'],
+            'options': questionData['type'] == 'True/False' ? [] : questionData['options'],
             'correctAnswer': questionData['correctAnswer'],
-            'correctAnswers': questionData['correctAnswers'],
           };
         }).toList();
 

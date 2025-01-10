@@ -88,7 +88,8 @@ class ExamDetailsPage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final question = questions[index];
                           final questionText = question['question'];
-                          final options = question['options'];
+                          final questionType = question['type']; // نوع السؤال
+                          final correctAnswer = question['correctAnswer']; // الجواب الصحيح
 
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -105,9 +106,18 @@ class ExamDetailsPage extends StatelessWidget {
                                   color: Colors.black87,
                                 ),
                               ),
-                              subtitle: Column(
+                              subtitle: questionType == 'True/False'
+                                  ? Text(
+                                'الإجابة الصحيحة: $correctAnswer',
+                                style: GoogleFonts.cairo(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ) // عرض الجواب الصحيح
+                                  : (question['options'] != null && question['options'].isNotEmpty
+                                  ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: options.map<Widget>((option) {
+                                children: question['options'].map<Widget>((option) {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 4),
                                     child: Text(
@@ -119,7 +129,8 @@ class ExamDetailsPage extends StatelessWidget {
                                     ),
                                   );
                                 }).toList(),
-                              ),
+                              )
+                                  : null), // لا تعرض شيئًا إذا لم يكن هناك خيارات
                             ),
                           );
                         },

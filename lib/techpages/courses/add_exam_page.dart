@@ -86,20 +86,20 @@ class _AddExamPageState extends State<AddExamPage> {
         title: Text(
           'إضافة امتحان',
           style: GoogleFonts.cairo(
-            fontSize: 24, // تحديد حجم الخط
-            fontWeight: FontWeight.bold, // جعل الخط عريض
-            color: Colors.white, // تحديد اللون الأبيض للنص
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF0096AB), // الأزرق الفاتح
+        backgroundColor: const Color(0xFF0096AB),
         iconTheme: const IconThemeData(
-          color: Colors.white, // تحديد اللون الأبيض لزر الرجوع
+          color: Colors.white,
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Directionality(
-          textDirection: TextDirection.rtl, // تحديد الاتجاه من اليمين لليسار
+          textDirection: TextDirection.rtl,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -138,13 +138,13 @@ class _AddExamPageState extends State<AddExamPage> {
               ElevatedButton(
                 onPressed: isSaving ? null : _saveExam,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0096AB), // اللون الأزرق
+                  backgroundColor: const Color(0xFF0096AB),
                   padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   textStyle: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold),
-                  elevation: 5, // إضافة الظل
+                  elevation: 5,
                 ),
                 child: isSaving
                     ? const CircularProgressIndicator(
@@ -155,7 +155,7 @@ class _AddExamPageState extends State<AddExamPage> {
                   style: GoogleFonts.cairo(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // لون الخط الأبيض
+                    color: Colors.white,
                   ),
                 ),
               ),
