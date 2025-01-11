@@ -62,7 +62,8 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
     // Save options for Multiple Choice
     if (questionType == 'Multiple Choice') {
       questionData['options'] = options;
-      questionData['correctAnswers'] = options.where((option) => option['isCorrect']).map((option) => option['text']).toList();
+      questionData['correctAnswers'] = options
+          .firstWhere((option) => option['isCorrect'], )?['text'];
     }
 
     // Save correct answer for True/False
@@ -137,7 +138,7 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
                     trueFalseAnswer = null;
                   });
                 },
-                items: ['Multiple Choice', 'True/False', 'Essay']
+                items: ['Multiple Choice', 'True/False']
                     .map<DropdownMenuItem<String>>((value) {
                   return DropdownMenuItem<String>(value: value, child: Text(value));
                 }).toList(),

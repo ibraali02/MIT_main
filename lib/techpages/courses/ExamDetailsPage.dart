@@ -63,6 +63,139 @@ class ExamDetailsPage extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Divider(),
 
+                // StreamBuilder for exam questions with answers
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('courses')
+                      .doc(courseId)
+                      .collection('exams')
+                      .doc(examId)
+                      .collection('questions')
+                      .get(),
+                  builder: (context, questionsSnapshot) {
+                    if (questionsSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (!questionsSnapshot.hasData || questionsSnapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text('لا توجد أسئلة.'));
+                    }
+
+                    final questions = questionsSnapshot.data!.docs;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'الأسئلة مع الإجابات:',
+                              style: GoogleFonts.cairo(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...questions.map((question) {
+                              final questionText = question['question'];
+                              final questionType = question['type'];
+
+                              // Handling multiple choice questions
+                              if (questionType == 'Multiple Choice') {
+                                final options = List<Map<String, dynamic>>.from(question['options']);
+                                final correctAnswer = options.firstWhere((option) => option['isCorrect'] == true)['text'];
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'السؤال: $questionText',
+                                          style: GoogleFonts.cairo(
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          ...options.map((option) {
+                                            return Text(
+                                              option['text'],
+                                              style: GoogleFonts.cairo(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                              ),
+                                            );
+                                          }).toList(),
+                                          Text(
+                                            'الإجابة الصحيحة: $correctAnswer',
+                                            style: GoogleFonts.cairo(
+                                              fontSize: 14,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              // Handling True/False questions
+                              else if (questionType == 'True/False') {
+                                final correctAnswer = question['correctAnswer'];
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'السؤال: $questionText',
+                                          style: GoogleFonts.cairo(
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'الإجابة الصحيحة: $correctAnswer',
+                                        style: GoogleFonts.cairo(
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              return SizedBox.shrink();
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 16),
+                const Divider(),
+
+                // StreamBuilder for student answers
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -70,25 +203,25 @@ class ExamDetailsPage extends StatelessWidget {
                         .doc(courseId)
                         .collection('exams')
                         .doc(examId)
-                        .collection('questions')
+                        .collection('student_answers')
                         .snapshots(),
-                    builder: (context, questionsSnapshot) {
-                      if (questionsSnapshot.connectionState == ConnectionState.waiting) {
+                    builder: (context, answersSnapshot) {
+                      if (answersSnapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      if (!questionsSnapshot.hasData || questionsSnapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text('لا توجد أسئلة.'));
+                      if (!answersSnapshot.hasData || answersSnapshot.data!.docs.isEmpty) {
+                        return const Center(child: Text('لا توجد إجابات.'));
                       }
 
-                      final questions = questionsSnapshot.data!.docs;
+                      final studentAnswers = answersSnapshot.data!.docs;
 
                       return ListView.builder(
-                        itemCount: questions.length,
+                        itemCount: studentAnswers.length,
                         itemBuilder: (context, index) {
-                          final question = questions[index];
-                          final questionText = question['question'];
-                          final questionType = question['type'];
+                          final studentAnswer = studentAnswers[index];
+                          final studentName = studentAnswer['studentName'];
+                          final answers = studentAnswer['answers'] as List<dynamic>;
 
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -96,69 +229,49 @@ class ExamDetailsPage extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text(
-                                    questionText,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'الطالب: $studentName',
                                     style: GoogleFonts.cairo(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       color: Colors.black87,
                                     ),
                                   ),
-                                  subtitle: questionType == 'True/False'
-                                      ? Text(
-                                    'الإجابة الصحيحة: ${question['correctAnswer']}',
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  )
-                                      : null,
-                                ),
-                                // Display answers
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('courses')
-                                      .doc(courseId)
-                                      .collection('exams')
-                                      .doc(examId)
-                                      .collection('questions')
-                                      .doc(question.id)
-                                      .collection('answers')
-                                      .snapshots(),
-                                  builder: (context, answersSnapshot) {
-                                    if (answersSnapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator());
-                                    }
-
-                                    if (!answersSnapshot.hasData || answersSnapshot.data!.docs.isEmpty) {
-                                      return const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('لا توجد إجابات.'),
-                                      );
-                                    }
-
-                                    final answers = answersSnapshot.data!.docs;
-
-                                    return Column(
-                                      children: answers.map((answer) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            'الطالب: ${answer['studentName']}, الإجابة: ${answer['studentAnswer']}',
+                                  const SizedBox(height: 8),
+                                  ...answers.map((answer) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'السؤال: ${answer['question']}',
+                                              style: GoogleFonts.cairo(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'الإجابة: ${answer['answer']}',
                                             style: GoogleFonts.cairo(
                                               fontSize: 14,
                                               color: Colors.black54,
                                             ),
                                           ),
-                                        );
-                                      }).toList(),
+                                        ],
+                                      ),
                                     );
-                                  },
-                                ),
-                              ],
+                                  }).toList(),
+                                ],
+                              ),
                             ),
                           );
                         },

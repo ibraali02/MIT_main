@@ -178,15 +178,14 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }
-
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Display two items per row
-            crossAxisSpacing: 16, // Space between columns
-            mainAxisSpacing: 16, // Space between rows
-            childAspectRatio: 0.7, // Aspect ratio for the course cards
+            crossAxisCount: 1, // بطاقة واحدة في كل صف
+            crossAxisSpacing: 16, // المسافة بين الأعمدة (غير مستخدمة هنا بسبب وجود بطاقة واحدة)
+            mainAxisSpacing: 16, // المسافة بين الصفوف
+            childAspectRatio: 1.2, // زيادة ارتفاع الكارد
           ),
           itemCount: courses.length,
           itemBuilder: (context, index) {
@@ -204,8 +203,8 @@ class _HomePageState extends State<HomePage> {
                 String createdAt = s.DateFormat('yyyy-MM-dd').format(course['created_at'].toDate());
 
                 return _buildCourseCard(
-
-                  context,createdAt,
+                  context,
+                  createdAt,
                   course['image_url'],
                   course['title'],
                   course['details'],
@@ -219,6 +218,7 @@ class _HomePageState extends State<HomePage> {
             );
           },
         );
+
       },
     );
   }
@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: Image.network(
                     imageUrl,
-                    height: 120,
+                    height: 170,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

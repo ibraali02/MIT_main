@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'exam_page_logic.dart';
 
 class ExamPage extends StatefulWidget {
   final String courseId;
@@ -13,14 +14,7 @@ class ExamPage extends StatefulWidget {
 }
 
 class _ExamPageState extends State<ExamPage> {
-  int currentQuestionIndex = 0;
-  List<Map<String, dynamic>> questions = [];
-  List<String?> answers = [];
-  bool isFinished = false;
-  int score = 0;
-  int remainingTime = 0;
-  late int initialTime;
-  late Duration timerDuration;
+  final ExamPageLogic _logic = ExamPageLogic();
   String studentFirstName = '';
   bool hasEnteredName = false;
 
@@ -29,121 +23,30 @@ class _ExamPageState extends State<ExamPage> {
     super.initState();
   }
 
-  void _loadQuestions() async {
-    try {
-      var examSnapshot = await FirebaseFirestore.instance
-          .collection('courses')
-          .doc(widget.courseId)
-          .collection('exams')
-          .doc(widget.examId)
-          .get();
-
-      if (examSnapshot.exists && examSnapshot.data() != null) {
-        initialTime = examSnapshot['duration'];
-        remainingTime = initialTime * 60;
-        timerDuration = Duration(seconds: remainingTime);
-
-        var questionsSnapshot = await FirebaseFirestore.instance
-            .collection('courses')
-            .doc(widget.courseId)
-            .collection('exams')
-            .doc(widget.examId)
-            .collection('questions')
-            .get();
-
-        List<Map<String, dynamic>> loadedQuestions = questionsSnapshot.docs.map((questionDoc) {
-          var questionData = questionDoc.data();
-          return {
-            'id': questionDoc.id, // Store the document ID
-            'question': questionData['question'],
-            'type': questionData['type'],
-            'options': questionData['type'] == 'True/False' ? [] : questionData['options'],
-            'correctAnswer': questionData['correctAnswer'],
-          };
-        }).toList();
-
-        setState(() {
-          questions = loadedQuestions;
-          answers = List.generate(loadedQuestions.length, (index) => null);
-        });
-
-        _startTimer();
-      }
-    } catch (error) {
-      print('Error loading exam or questions: $error');
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!hasEnteredName) {
+      _logic.loadQuestions(widget.courseId, widget.examId);
     }
   }
 
-  void _startTimer() {
-    if (remainingTime > 0) {
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && remainingTime > 0 && !isFinished) {
-          setState(() {
-            remainingTime--;
-            timerDuration = Duration(seconds: remainingTime);
-          });
-          _startTimer();
-        }
-      });
-    }
-  }
+  // دالة لحفظ إجابات الطالب في Firestore
+  Future<void> _saveExamResults() async {
+    final examRef = FirebaseFirestore.instance.collection('exams').doc(widget.examId);
+    final studentRef = examRef.collection('students').doc(studentFirstName);
 
-  void _onAnswerSelected(String answer) {
-    setState(() {
-      answers[currentQuestionIndex] = answer;
-    });
-  }
-
-  void _nextQuestion() {
-    if (currentQuestionIndex < questions.length - 1) {
-      setState(() {
-        currentQuestionIndex++;
-      });
-    } else {
-      setState(() {
-        isFinished = true;
-        _calculateScore();
-      });
-    }
-  }
-
-  void _calculateScore() async {
-    int correctAnswers = 0;
-
-    for (int i = 0; i < questions.length; i++) {
-      if (questions[i]['type'] == 'True/False') {
-        if (answers[i] != null && answers[i] == questions[i]['correctAnswer']) {
-          correctAnswers++;
-        }
-      } else {
-        if (answers[i] != null &&
-            questions[i]['correctAnswer'].contains(answers[i])) {
-          correctAnswers++;
-        }
-      }
-    }
-
-    setState(() {
-      score = correctAnswers;
+    // حفظ البيانات داخل Firestore
+    await studentRef.set({
+      'studentName': studentFirstName,
+      'answers': _logic.answers,
+      'score': _logic.score,
+      'questions': _logic.questions.map((q) => q['question']).toList(),
+      'timeTaken': _logic.timerDuration.inSeconds,
+      'timestamp': FieldValue.serverTimestamp(),
     });
 
-    // Save answers in Firestore
-    for (int i = 0; i < questions.length; i++) {
-      await FirebaseFirestore.instance
-          .collection('courses')
-          .doc(widget.courseId)
-          .collection('exams')
-          .doc(widget.examId)
-          .collection('questions')
-          .doc(questions[i]['id']) // Use the unique question ID
-          .collection('answers') // Create a subcollection for answers
-          .add({
-        'studentName': studentFirstName,
-        'questionNumber': i + 1,
-        'studentAnswer': answers[i],
-        'correctAnswer': questions[i]['correctAnswer'],
-      });
-    }
+    print('Exam results saved for $studentFirstName');
   }
 
   @override
@@ -152,7 +55,7 @@ class _ExamPageState extends State<ExamPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text('أدخل اسمك', style: GoogleFonts.cairo()),
-          backgroundColor: const Color(0xFF0096AB),
+          backgroundColor: Color(0xFF0096AB),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -165,7 +68,7 @@ class _ExamPageState extends State<ExamPage> {
                 style: GoogleFonts.cairo(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0096AB),
+                  color: Color(0xFF0096AB),
                 ),
               ),
               const SizedBox(height: 16),
@@ -179,9 +82,9 @@ class _ExamPageState extends State<ExamPage> {
                   hintText: 'أدخل اسمك',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: Color(0xFF0096AB)),
+                    borderSide: BorderSide(color: Color(0xFF0096AB)),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   filled: true,
                   fillColor: Colors.blue[50],
                 ),
@@ -193,17 +96,16 @@ class _ExamPageState extends State<ExamPage> {
                   setState(() {
                     hasEnteredName = true;
                   });
-                  _loadQuestions();
                 }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0096AB),
+                  backgroundColor: Color(0xFF0096AB),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   elevation: 5,
-                  shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
+                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
                 ),
                 child: Text(
                   'ابدأ الامتحان',
@@ -219,15 +121,18 @@ class _ExamPageState extends State<ExamPage> {
       );
     }
 
-    if (questions.isEmpty) {
+    if (_logic.questions.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (isFinished) {
+    if (_logic.isFinished) {
+      // بعد إتمام الامتحان، حفظ الإجابات في Firestore
+      _saveExamResults();
+
       return Scaffold(
         appBar: AppBar(
           title: Text('النتيجة', style: GoogleFonts.cairo()),
-          backgroundColor: const Color(0xFF0096AB),
+          backgroundColor: Color(0xFF0096AB),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -235,7 +140,7 @@ class _ExamPageState extends State<ExamPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'نتيجتك: $score / ${questions.length}',
+                'نتيجتك: ${_logic.score} / ${_logic.questions.length}',
                 style: GoogleFonts.cairo(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -245,13 +150,13 @@ class _ExamPageState extends State<ExamPage> {
               const SizedBox(height: 24),
               Expanded(
                 child: ListView.builder(
-                  itemCount: questions.length,
+                  itemCount: _logic.questions.length,
                   itemBuilder: (context, index) {
-                    final question = questions[index]['question'];
-                    final correctAnswer = questions[index]['type'] == 'True/False'
-                        ? questions[index]['correctAnswer']
-                        : questions[index]['correctAnswer'].join(', ');
-                    final userAnswer = answers[index] ?? 'لم يتم الإجابة';
+                    final question = _logic.questions[index]['question'];
+                    final correctAnswer = _logic.questions[index]['type'] == 'True/False'
+                        ? _logic.questions[index]['correctAnswer']
+                        : _logic.questions[index]['correctAnswers'];
+                    final userAnswer = _logic.answers[index] ?? 'لم يتم الإجابة';
 
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 10),
@@ -270,7 +175,7 @@ class _ExamPageState extends State<ExamPage> {
                               style: GoogleFonts.cairo(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0096AB),
+                                color: Color(0xFF0096AB),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -303,13 +208,13 @@ class _ExamPageState extends State<ExamPage> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0096AB),
+                  backgroundColor: Color(0xFF0096AB),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   elevation: 5,
-                  shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
+                  shadowColor: Color(0xFF0096AB).withOpacity(0.3),
                 ),
                 child: Text(
                   'العودة إلى الصفحة الرئيسية',
@@ -325,14 +230,14 @@ class _ExamPageState extends State<ExamPage> {
       );
     }
 
-    final currentQuestion = questions[currentQuestionIndex];
+    final currentQuestion = _logic.questions[_logic.currentQuestionIndex];
     final questionText = currentQuestion['question'] ?? '';
     final questionType = currentQuestion['type'] ?? '';
 
     return Scaffold(
       appBar: AppBar(
         title: Text('الامتحان - $studentFirstName', style: GoogleFonts.cairo()),
-        backgroundColor: const Color(0xFF0096AB),
+        backgroundColor: Color(0xFF0096AB),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -340,7 +245,7 @@ class _ExamPageState extends State<ExamPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'الوقت المتبقي: ${timerDuration.inMinutes}:${(timerDuration.inSeconds % 60).toString().padLeft(2, '0')}',
+              'الوقت المتبقي: ${_logic.timerDuration.inMinutes}:${(_logic.timerDuration.inSeconds % 60).toString().padLeft(2, '0')}',
               style: GoogleFonts.cairo(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -349,11 +254,11 @@ class _ExamPageState extends State<ExamPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'السؤال ${currentQuestionIndex + 1}: $questionText',
+              'السؤال ${_logic.currentQuestionIndex + 1}: $questionText',
               style: GoogleFonts.cairo(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF0096AB),
+                color: Color(0xFF0096AB),
               ),
             ),
             const SizedBox(height: 16),
@@ -362,11 +267,12 @@ class _ExamPageState extends State<ExamPage> {
                 return RadioListTile<String>(
                   title: Text(option['text'], style: GoogleFonts.cairo()),
                   value: option['text'],
-                  groupValue: answers[currentQuestionIndex],
+                  groupValue: _logic.answers[_logic.currentQuestionIndex],
                   onChanged: (String? value) {
-                    _onAnswerSelected(value!);
+                    _logic.onAnswerSelected(value!);
+                    setState(() {});
                   },
-                  activeColor: const Color(0xFF0096AB),
+                  activeColor: Color(0xFF0096AB),
                   tileColor: Colors.blue[50],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -377,11 +283,12 @@ class _ExamPageState extends State<ExamPage> {
               RadioListTile<String>(
                 title: Text('صحيح', style: GoogleFonts.cairo()),
                 value: 'True',
-                groupValue: answers[currentQuestionIndex],
+                groupValue: _logic.answers[_logic.currentQuestionIndex],
                 onChanged: (String? value) {
-                  _onAnswerSelected(value!);
+                  _logic.onAnswerSelected(value!);
+                  setState(() {});
                 },
-                activeColor: const Color(0xFF0096AB),
+                activeColor: Color(0xFF0096AB),
                 tileColor: Colors.blue[50],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -390,11 +297,12 @@ class _ExamPageState extends State<ExamPage> {
               RadioListTile<String>(
                 title: Text('خطأ', style: GoogleFonts.cairo()),
                 value: 'False',
-                groupValue: answers[currentQuestionIndex],
+                groupValue: _logic.answers[_logic.currentQuestionIndex],
                 onChanged: (String? value) {
-                  _onAnswerSelected(value!);
+                  _logic.onAnswerSelected(value!);
+                  setState(() {});
                 },
-                activeColor: const Color(0xFF0096AB),
+                activeColor: Color(0xFF0096AB),
                 tileColor: Colors.blue[50],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -403,28 +311,35 @@ class _ExamPageState extends State<ExamPage> {
             ],
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: currentQuestionIndex == questions.length - 1
+              onPressed: _logic.currentQuestionIndex == _logic.questions.length - 1
                   ? () {
                 setState(() {
-                  isFinished = true;
-                  _calculateScore();
+                  _logic.isFinished = true;
                 });
+                _logic.calculateScore(setState);
               }
-                  : _nextQuestion,
+                  : () {
+                setState(() {
+                  _logic.nextQuestion(setState);
+                });
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0096AB),
+                backgroundColor: Color(0xFF0096AB),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 elevation: 5,
-                shadowColor: const Color(0xFF0096AB).withOpacity(0.3),
+                shadowColor: Color(0xFF0096AB).withOpacity(0.3),
               ),
               child: Text(
-                currentQuestionIndex == questions.length - 1
-                    ? 'عرض النتيجة'
-                    : 'التالي',
-                style: GoogleFonts.cairo(color: Colors.white),
+                _logic.currentQuestionIndex == _logic.questions.length - 1
+                    ? 'إتمام الامتحان'
+                    : 'السؤال التالي',
+                style: GoogleFonts.cairo(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
